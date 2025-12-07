@@ -1,5 +1,7 @@
 // kernel.c - Our first C kernel!
 
+#include <stdint.h>   //for debug
+
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
 #define VGA_WIDTH 80
@@ -7,6 +9,10 @@
 // VGA color codes
 #define COLOR_BLACK 0
 #define COLOR_WHITE 15
+
+// External functions from other files
+extern void idt_init(void);
+extern void pic_remap(void);
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -34,6 +40,19 @@ void vga_clear() {
     }
 }
 
+// Enable interrupts
+static inline void enable_interrupts() {
+    __asm__ volatile("sti");
+}
+
+// Add this helper function 
+void vga_print_hex(int x, int y, uint32_t value) { //for debug
+    char hex_chars[] = "0123456789ABCDEF";
+    for (int i = 7; i >= 0; i--) {
+        vga_putchar(x + (7 - i), y, hex_chars[(value >> (i * 4)) & 0xF], 0x0F);
+    }
+}
+
 // This is called by boot.asm!
 void kernel_main(void) {
     // Clear screen
@@ -41,12 +60,21 @@ void kernel_main(void) {
     
     // Print our message
     unsigned char color = (COLOR_BLACK << 4) | COLOR_WHITE;  // White text on black background
-    vga_print(0, 0, "Hello from C kernel!", color);
-    vga_print(0, 1, "We are in protected mode!", color);
-    vga_print(0, 2, "Next: Set up IDT and keyboard!", color);
+    vga_print(0, 0, "MyOS - Protected Mode Kernel", color);
     
-    // Hang forever
+    // Initialize IDT
+    idt_init();
+    vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
+    vga_print(0, 2, "Type something on the keyboard:", color);
+
+    // Remap PIC
+    pic_remap();
+    
+    // Enable interrupts!
+    enable_interrupts();
+    
+    // Hang forever (interrupts will still work!)
     while (1) {
-        // Do nothing
+        __asm__ volatile("hlt");  // Halt until next interrupt
     }
 }

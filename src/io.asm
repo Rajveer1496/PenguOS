@@ -1,0 +1,20 @@
+; io.asm - I/O port read/write functions
+
+section .text
+
+; void outb(uint16_t port, uint8_t value)
+; Write a byte to an I/O port
+global outb
+outb:
+    mov dx, [esp + 4]    ; port number (16-bit)
+    mov al, [esp + 8]    ; value to write (8-bit)
+    out dx, al           ; Send AL to port DX
+    ret
+
+; uint8_t inb(uint16_t port)
+; Read a byte from an I/O port
+global inb
+inb:
+    mov dx, [esp + 4]    ; port number (16-bit)
+    in al, dx            ; Read from port DX into AL
+    ret                  ; Return value is in AL

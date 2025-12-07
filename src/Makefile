@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o
 
 # Default target - build everything
 all: $(ISO)
@@ -24,7 +24,7 @@ all: $(ISO)
 $(ISO): $(KERNEL_BIN)
 	mkdir -p isodir/boot/grub
 	cp $(KERNEL_BIN) isodir/boot/
-	echo 'menuentry "PenguOS" {' > isodir/boot/grub/grub.cfg
+	echo 'menuentry "MyOS" {' > isodir/boot/grub/grub.cfg
 	echo '    multiboot /boot/$(KERNEL_BIN)' >> isodir/boot/grub/grub.cfg
 	echo '}' >> isodir/boot/grub/grub.cfg
 	grub2-mkrescue -o $(ISO) isodir
@@ -40,6 +40,30 @@ boot.o: boot.asm
 # Compile C file
 kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile IDT C file
+idt.o: idt.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile PIC C file
+pic.o: pic.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile keyboard C file
+keyboard.o: keyboard.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile IDT loader assembly
+idt_load.o: idt_load.asm
+	$(ASM) $(ASMFLAGS) $< -o $@
+
+# Compile interrupt stubs assembly
+interrupt_stubs.o: interrupt_stubs.asm
+	$(ASM) $(ASMFLAGS) $< -o $@
+
+# Compile I/O assembly
+io.o: io.asm
+	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Run in QEMU
 run: $(ISO)
