@@ -179,3 +179,7 @@ void interrupt_handler(uint32_t int_no) {
     // DEBUG: show we got here
     vga_putchar(70, 0, 'K', 0x0F);  // Print 'K' in top-right corner
 }
+
+/* WHAT HAPPNES WHEN I PRESS A KEY
+okay so when i press key on keyboard, a chip in my keyboard send an interrupt signal to cpu with a 8 bit number that tells which key is pressed/released etc. then upon that interrupt cpu stops whatever it was doing, pushes error code ,interrupt number and return address and jumps to the IDT table according to which interrupt it was and then calls common handler function which stores all state of registers in the stack then passes value of interrupt number to interrupt handler then the interrupt handler in our idt.c runs a function according to the int_no like printing a character on screen according the which key was pressed, then at end it send the EOI signal that we are done with this interrupt and you can send another interrupt, then after that the common handler function restores all registers and cleans up the error_code and int_no by shifting stack pointer to return address and then does iret which shifts cpu to what it was doin
+*/

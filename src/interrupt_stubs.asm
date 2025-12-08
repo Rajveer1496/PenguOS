@@ -25,7 +25,7 @@ interrupt_common:
     mov gs, ax
 
 
-     ; Push interrupt number as parameter to C function
+    ; Push interrupt number as parameter to C function
     mov eax, [esp + 48]  ; Get interrupt number (after all pushes)
     push eax
     

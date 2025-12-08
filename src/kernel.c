@@ -60,18 +60,18 @@ void kernel_main(void) {
     
     // Print our message
     unsigned char color = (COLOR_BLACK << 4) | COLOR_WHITE;  // White text on black background
-    vga_print(0, 0, "MyOS - Protected Mode Kernel", color);
+    vga_print(0, 0, "PenguOS - Protected Mode Kernel", color);
     
     // Initialize IDT
     idt_init();
-    vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
-    vga_print(0, 2, "Type something on the keyboard:", color);
+    // vga_print(0, 2, "Type something on the keyboard:", color);
 
     // Remap PIC
     pic_remap();
     
     // Enable interrupts!
     enable_interrupts();
+    vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
     
     // Hang forever (interrupts will still work!)
     while (1) {

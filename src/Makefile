@@ -24,7 +24,7 @@ all: $(ISO)
 $(ISO): $(KERNEL_BIN)
 	mkdir -p isodir/boot/grub
 	cp $(KERNEL_BIN) isodir/boot/
-	echo 'menuentry "MyOS" {' > isodir/boot/grub/grub.cfg
+	echo 'menuentry "PenguOS" {' > isodir/boot/grub/grub.cfg
 	echo '    multiboot /boot/$(KERNEL_BIN)' >> isodir/boot/grub/grub.cfg
 	echo '}' >> isodir/boot/grub/grub.cfg
 	grub2-mkrescue -o $(ISO) isodir
@@ -67,6 +67,7 @@ io.o: io.asm
 
 # Run in QEMU
 run: $(ISO)
+	# rm -rf $(OBJS) $(KERNEL_BIN)
 	qemu-system-i386 -cdrom $(ISO)
 
 # Clean build artifacts
