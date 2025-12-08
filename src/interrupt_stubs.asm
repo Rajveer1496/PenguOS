@@ -23,10 +23,17 @@ interrupt_common:
     mov es, ax
     mov fs, ax
     mov gs, ax
+
+
+     ; Push interrupt number as parameter to C function
+    mov eax, [esp + 48]  ; Get interrupt number (after all pushes)
+    push eax
     
     ; Call C interrupt handler
     ; Stack now contains all saved registers
     call interrupt_handler
+
+    add esp, 4  ; Clean up parameter
     
     ; Restore segment registers
     pop gs

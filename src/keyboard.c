@@ -65,5 +65,6 @@ void keyboard_handler(void) {
     }
     
     // Send EOI to PIC
+    // vga_print(0, 2, "Type something on the keyboard:", color);
     pic_send_eoi(1);  // IRQ 1 is keyboard
 }

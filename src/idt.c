@@ -156,26 +156,26 @@ void idt_init(void) {
 extern void keyboard_handler(void);
 extern void pic_send_eoi(uint8_t irq);
 
+
+extern void vga_putchar(int x, int y, char c, unsigned char color); // for debug
 extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 
 // C interrupt handler - called from assembly
-void interrupt_handler(void) {
+void interrupt_handler(uint32_t int_no) {
     
-    // Read the interrupt number from the stack
-    // (It was pushed by our assembly stub)
-    uint32_t *stack_ptr = (uint32_t *)__builtin_frame_address(0);
-    uint32_t int_no = stack_ptr[9];  // Interrupt number is at offset 9
+    // DBUG: show interrupt number on screen
+    vga_print_hex(60, 0, int_no); //to show the interrupt number
 
-    // Debug: show interrupt number on screen
-    // vga_print_hex(50, 0, int_no);
-    
-    // Handle keyboard interrupt
+    // int_no = 33; //DEBUG: but if we purposefully set it the keyboard starts to work, cuz it called keyboard handler
     if (int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
-        keyboard_handler();
+           keyboard_handler();
     } 
     // Handle all other hardware IRQs (just acknowledge them)
     else if (int_no >= 32 && int_no < 48 && int_no != 33) {
         pic_send_eoi(int_no - 32);  // Send EOI for unhandled IRQs
     }
     // For CPU exceptions (0-31), do nothing for now
+
+    // DEBUG: show we got here
+    vga_putchar(70, 0, 'K', 0x0F);  // Print 'K' in top-right corner
 }
