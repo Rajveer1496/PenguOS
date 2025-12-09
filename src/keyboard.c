@@ -185,6 +185,7 @@ void keyboard_handler(void) {
         while(str[i] != '\0'){
             i++;
         }
+        if(i >= 79) return; // safety check BUFFER IS FULL
         str[i] = c;
         str[i+1] = '\0'; //add null terminator at end
     }

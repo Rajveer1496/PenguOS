@@ -2,6 +2,7 @@
 
 extern void vga_print(int x, int y, const char *str, unsigned char color); //for debug
 extern void vga_clear();
+extern void outb(uint16_t port, uint8_t value); // to write data to a port
 
 int strCompare(const char *str1,const char *str2);
 void printToscreen(const char *str,unsigned char color);
@@ -18,7 +19,13 @@ void shellExecute(const char *str){
         cursor_y = -1;
     }else if(strCompare(str,"about")){
         printToscreen("PenguOS - Made by Rj",0x0E);
+    }else if(strCompare(str,"reboot")){
+        printToscreen("Rebooting!",0x0E);
+        outb(0x64,0xFE);
+    }else if(strCompare(str,"")){
+        //do nothing if just pressed enter
     }
+    else printToscreen("Buddy what are you trying to say? use 'help' for available commands",0x0E);
 }
 
 ///--COMMAND FUNCTIONS---
