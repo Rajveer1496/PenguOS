@@ -14,6 +14,14 @@
 extern void idt_init(void);
 extern void pic_remap(void);
 extern void print_header();
+extern void printToscreen(const char *str,unsigned char color);
+extern int cursor_x;
+extern int cursor_y;
+
+//Paging functions
+extern void page_init();
+extern void* alloc_page();
+extern void free_page(void* addr);
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -71,9 +79,31 @@ void kernel_main(void) {
     pic_remap();
     
     // Enable interrupts!
-    enable_interrupts();
+    // enable_interrupts();
 
-    print_header(); // to print first shell header
+    //Initialize PMM
+    page_init();
+
+    //DEBUG: TESTING PAGING
+    void * pageA = alloc_page();
+    printToscreen("Allocated Memory to Page-A With Adress:",0x0F);
+    cursor_y++;
+    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageA);
+    
+    void * pageB = alloc_page();
+    printToscreen("Allocated Memory to Page-B With Adress:",0x0F);
+    cursor_y++;
+    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageB);
+
+    free_page(pageA);
+    printToscreen("Freed PageA:",0x0F);
+
+    void * pageC = alloc_page();
+    printToscreen("Allocated Memory to Page-C With Adress:",0x0F);
+    cursor_y++;
+    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageC);
+
+    // print_header(); // to print first shell header
     // vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
     
     // Hang forever (interrupts will still work!)

@@ -34,4 +34,5 @@ SECTIONS
         *(.bss)
         *(COMMON)
     }
+    _kernel_end = .;  /* This symbol = address where kernel ends! */
 }
