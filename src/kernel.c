@@ -13,6 +13,7 @@
 // External functions from other files
 extern void idt_init(void);
 extern void pic_remap(void);
+extern void print_header();
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -59,8 +60,8 @@ void kernel_main(void) {
     vga_clear();
     
     // Print our message
-    unsigned char color = (COLOR_BLACK << 4) | COLOR_WHITE;  // White text on black background
-    vga_print(0, 0, "PenguOS - Protected Mode Kernel", color);
+    // unsigned char color = (COLOR_BLACK << 4) | COLOR_WHITE;  // White text on black background
+    // vga_print(0, 0, "PenguOS - Protected Mode Kernel", color);
     
     // Initialize IDT
     idt_init();
@@ -71,7 +72,9 @@ void kernel_main(void) {
     
     // Enable interrupts!
     enable_interrupts();
-    vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
+
+    print_header(); // to print first shell header
+    // vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
     
     // Hang forever (interrupts will still work!)
     while (1) {

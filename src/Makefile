@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o
 
 # Default target - build everything
 all: $(ISO)
@@ -39,6 +39,10 @@ boot.o: boot.asm
 
 # Compile C file
 kernel.o: kernel.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile shell C file
+shell.o: shell.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile IDT C file
