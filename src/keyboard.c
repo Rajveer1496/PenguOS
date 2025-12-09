@@ -4,6 +4,7 @@
 
 // External functions
 extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
+extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern void pic_send_eoi(uint8_t irq);
 extern void vga_putchar(int x, int y, char c, unsigned char color);
 extern void vga_print_hex(int x, int y, uint32_t value); //for debug
@@ -66,6 +67,13 @@ void keyboard_handler(void) {
 
     // Only handle key press events (bit 7 = 0 means key pressed)
     if (!(scancode & 0x80)) {
+        //Arrow Keys handling
+        if(scancode == 0x4B) cursor_x--; //left arrow
+        if(scancode == 0x4D) cursor_x++; //right arrow
+        if(scancode == 0x48) cursor_y--; //up arrow
+        if(scancode == 0x50) cursor_y++; //down arrow
+
+
         // Convert scancode to ASCII
         if (scancode < sizeof(scancode_to_ascii)) {
             char c;
@@ -103,10 +111,15 @@ void keyboard_handler(void) {
             else if (c != 0) {
                 // Handle special characters
                 if (c == '\n') { //Enter key
+                    if(cursor_y < 24){
                     cursor_x = 0;
                     cursor_y++;
+                    }
                 } else if (c == '\b') { //Backspace
-                    if(cursor_x == 0){ //get back to upper line
+                    if((cursor_x == 0) && (cursor_y == 0)){
+                        //Do nothing
+                    }
+                    else if(cursor_x == 0){ //get back to upper line
                         cursor_y--;
                         cursor_x = 80;
                     }
@@ -127,19 +140,33 @@ void keyboard_handler(void) {
                 }
                 
                 // Simple scroll (wrap to top)
-                if (cursor_y >= 25) {
-                    cursor_y = 5;
-                    cursor_x = 0;
+                if (cursor_y == 25) {
+                    // cursor_y = 5;
+                    // cursor_x = 0;
+                    //Do nothing
                 }
             }
         }
     }
+
+
+//Update Cursor
+
+uint16_t position = (cursor_y * 80) + cursor_x;
+uint8_t low_byte = (position & 0xFF);
+uint8_t high_byte = ((position >> 8) & 0xFF);
+
+outb(0x3D4, 14); // 14 = command to set high_byte
+outb(0x3D5, high_byte); //pass the high byte
+
+outb(0x3D4, 15); // 15 = command to set low_byte
+outb(0x3D5, low_byte); //pass the low byte
+
     
     // Send EOI to PIC
     // vga_print(0, 2, "Type something on the keyboard:", color);
     pic_send_eoi(1);  // IRQ 1 is keyboard
 }
-
 
 
 /*
@@ -156,7 +183,5 @@ CAPSLOCK Release = BA
 
 
 /* THE CHECKLIST
-
-
 
 */
