@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define maxPages 4194304
+#define maxPages 4194304 //for 16 GB RAM
 
-extern uint32_t _kernel_end; //to get adress of this label which is at end of kernel
+extern uint32_t _kernel_end; //label which is at end of kernel
 uint32_t *bitmap = (uint32_t *)&_kernel_end; // start bitmap exactly where kernel ends
 
 void set_page_free(uint32_t pagenum){
@@ -11,7 +11,7 @@ void set_page_free(uint32_t pagenum){
     uint32_t bit_index = pagenum % 32; //to get the page bit
 
     //Manipulating the exact bit that refers to given page
-    bitmap[word_index] &= ~(1 << bit_index);
+    bitmap[word_index] &= ~(1 << bit_index); //setting it to 0, free
 }
 
 void set_page_inUse(uint32_t pagenum){

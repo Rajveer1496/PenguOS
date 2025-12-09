@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o paging.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o
 
 # Default target - build everything
 all: $(ISO)
@@ -46,7 +46,7 @@ shell.o: shell.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile paging file
-paging.o: paging.c
+pmm.o: pmm.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile IDT C file

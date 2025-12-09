@@ -81,7 +81,7 @@ void kernel_main(void) {
     // Enable interrupts!
     // enable_interrupts();
 
-    //Initialize PMM
+    //Initialize PMM (Physical Memory Manager)
     page_init();
 
     //DEBUG: TESTING PAGING
@@ -97,6 +97,8 @@ void kernel_main(void) {
 
     free_page(pageA);
     printToscreen("Freed PageA:",0x0F);
+    cursor_y++;
+    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageA);
 
     void * pageC = alloc_page();
     printToscreen("Allocated Memory to Page-C With Adress:",0x0F);
