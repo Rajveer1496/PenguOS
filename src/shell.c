@@ -24,6 +24,8 @@ void shellExecute(const char *str){
         outb(0x64,0xFE);
     }else if(strCompare(str,"")){
         //do nothing if just pressed enter
+    }else if(strCompare(str,"devdi")){
+        printToscreen(";)",0x0E);
     }
     else printToscreen("Buddy what are you trying to say? use 'help' for available commands",0x0E);
 }

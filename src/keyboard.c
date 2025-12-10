@@ -78,11 +78,12 @@ void keyboard_handler(void) {
     
     if (!(scancode & 0x80)) { // Only handle key press events (bit 7 = 0 means key pressed)
         //Arrow Keys handling (No arrow keys for now, Will impliment later)
-        // if(scancode == 0x4B) cursor_x--; //left arrow
-        // if(scancode == 0x4D) cursor_x++; //right arrow
+        
         // if(scancode == 0x48) cursor_y--; //up arrow
         // if(scancode == 0x50) cursor_y++; //down arrow
 
+        if(scancode == 0x4B && cursor_x>10) cursor_x--; //left arrow
+        if(scancode == 0x4D) cursor_x++; //right arrow
 
 
         // Convert scancode to ASCII
