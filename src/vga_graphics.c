@@ -6,13 +6,14 @@
 
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern uint8_t inb(uint16_t port); //to read data from port 
+extern void serial_print(const char* str);
 
 void write_pixel(int x, int y, uint8_t color);
 
 uint8_t *buffer = (uint8_t*)VGA_GRAPHICS_MEMORY;
 
 // Mode 13h register values
-unsigned char mode13h_regs[61] = { //theese are the values that should go into each reister
+unsigned char mode13h_regs[61] = { //theese are the values that should go into each register
     // MISC Output Register
     0x63,
     
@@ -79,6 +80,8 @@ void set_mode_13h(){
 }
 
 void write_pixel(int x, int y, uint8_t color){
+    if(x<=WIDTH && y <=HEIGHT){
     int index = (WIDTH * y) + x;
     buffer[index] = color;
+    }else serial_print("Error: Trying to print out of screen!\n");
 }

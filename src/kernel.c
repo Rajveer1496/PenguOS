@@ -107,7 +107,7 @@ void kernel_main(void) {
 
     //Switching to graphics mode
     set_mode_13h();
-    serial_print("Graphics Mode Enabled!");
+    serial_print("Graphics Mode Enabled!\n");
 
     //testing
     for(int i=0;i<WIDTH;i++){
@@ -115,6 +115,8 @@ void kernel_main(void) {
             write_pixel(i,j,(i+j)*i);
         }
     }
+
+    write_pixel(1000,100,0x0E);
 
     serial_print("\n");
     
