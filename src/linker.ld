@@ -36,3 +36,9 @@ SECTIONS
     }
     _kernel_end = .;  /* This symbol = address where kernel ends! */
 }
+
+/* 
+1. You write: idt.c, keyboard.c, paging.c, etc.
+2. Compiler compiles each into: idt.o, keyboard.o, paging.o, etc.
+3. Linker combines them all into: kernel.bin
+*/

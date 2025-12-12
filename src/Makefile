@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o
 
 # Default target - build everything
 all: $(ISO)
@@ -45,6 +45,9 @@ kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 paging.o: paging.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+serial.o: serial.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile shell C file
@@ -82,7 +85,7 @@ io.o: io.asm
 # Run in QEMU
 run: $(ISO)
 	# rm -rf $(OBJS) $(KERNEL_BIN)
-	qemu-system-i386 -cdrom $(ISO)
+	qemu-system-i386 -cdrom $(ISO) -serial stdio
 
 # Clean build artifacts
 clean:

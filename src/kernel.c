@@ -5,6 +5,7 @@
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
 #define VGA_WIDTH 80
+#define VGA_GRAPHICS_MEMORY 0xA0000
 
 // VGA color codes
 #define COLOR_BLACK 0
@@ -23,6 +24,10 @@ extern void page_init();
 extern void* alloc_page();
 extern void free_page(void* addr);
 extern void paging_init();
+
+//Serial Debuging Functions
+extern void serial_init();
+extern void serial_print(const char* str);
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -67,51 +72,34 @@ void vga_print_hex(int x, int y, uint32_t value) { //for debug
 void kernel_main(void) {
     // Clear screen
     vga_clear();
-    
-    // Print our message
-    // unsigned char color = (COLOR_BLACK << 4) | COLOR_WHITE;  // White text on black background
-    // vga_print(0, 0, "PenguOS - Protected Mode Kernel", color);
+
+    //initialize serial port
+    serial_init();
+    serial_print("Serial Port is initialized!\n");
+
     
     // Initialize IDT
     idt_init();
-    // vga_print(0, 2, "Type something on the keyboard:", color);
+    serial_print("IDT initialized!\n");
 
     // Remap PIC
     pic_remap();
     
     // Enable interrupts!
     enable_interrupts();
+    serial_print("Interrupts Enabled!\n");
 
     //Initialize PMM (Physical Memory Manager)
     page_init();
+    serial_print("PMM initialized!\n");
 
-    //DEBUG: TESTING PAGING
-    vga_clear();
-    vga_print(0, 1, "Before Paging!", 0x0f);
-
+    //Start Paging
     paging_init();
-    vga_print(0, 3, "After Paging", 0x0f);
+    serial_print("Paging Enabled!\n");
 
-    // Test: Allocate a page and use it through virtual address
-    void* test_page = alloc_page();
-    vga_print(0, 5, "Allocated page at:", 0x0F);
-    vga_print_hex(25, 5, (uint32_t)test_page);
+    print_header(); // to print first shell header
 
-    // Write through virtual address (identity mapped)
-    int* ptr = (int*)test_page;
-    *ptr = 0xDEADBEEF;
-
-    // Read it back
-    vga_print(0, 6, "Read back value:", 0x0F);
-    vga_print_hex(25, 6, *ptr);
-
-    if (*ptr == 0xDEADBEEF) {
-        vga_print(0, 7, "SUCCESS! Paging works!", 0x0A);
-    }
-    
-    
-    // print_header(); // to print first shell header
-    // vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
+    serial_print("\n");
     
     // Hang forever (interrupts will still work!)
     while (1) {
