@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o
 
 # Default target - build everything
 all: $(ISO)
@@ -48,6 +48,9 @@ paging.o: paging.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 serial.o: serial.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+vga_graphics.o: vga_graphics.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile shell C file

@@ -29,6 +29,12 @@ extern void paging_init();
 extern void serial_init();
 extern void serial_print(const char* str);
 
+//VGA Grahics Functions
+#define WIDTH 320
+#define HEIGHT 200
+extern void set_mode_13h();
+extern void write_pixel(int x, int y, uint8_t color);
+
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
     unsigned short *vga = (unsigned short *)VGA_MEMORY;
@@ -97,7 +103,18 @@ void kernel_main(void) {
     paging_init();
     serial_print("Paging Enabled!\n");
 
-    print_header(); // to print first shell header
+    // print_header(); // to print first shell header
+
+    //Switching to graphics mode
+    set_mode_13h();
+    serial_print("Graphics Mode Enabled!");
+
+    //testing
+    for(int i=0;i<WIDTH;i++){
+        for(int j=0; j<HEIGHT;j++){
+            write_pixel(i,j,(i+j)*i);
+        }
+    }
 
     serial_print("\n");
     
