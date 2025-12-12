@@ -6,6 +6,7 @@ extern void outb(uint16_t port, uint8_t value); // to write data to a port
 
 int strCompare(const char *str1,const char *str2);
 void printToscreen(const char *str,unsigned char color);
+void JustPrint(); //for debug
 
 extern int cursor_x;
 extern int cursor_y;
@@ -52,4 +53,10 @@ void shellExecute(const char *str){
         cursor_x = 0;
         cursor_y++;
         vga_print(cursor_x, cursor_y, str, color);
+    }
+
+    void JustPrint(){
+        cursor_x = 0;
+        cursor_y++;
+        vga_print(cursor_x, cursor_y, "JUST PRINT", 0x0B);
     }

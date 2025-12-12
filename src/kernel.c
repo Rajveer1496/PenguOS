@@ -22,6 +22,7 @@ extern int cursor_y;
 extern void page_init();
 extern void* alloc_page();
 extern void free_page(void* addr);
+extern void paging_init();
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -79,32 +80,36 @@ void kernel_main(void) {
     pic_remap();
     
     // Enable interrupts!
-    // enable_interrupts();
+    enable_interrupts();
 
     //Initialize PMM (Physical Memory Manager)
     page_init();
 
     //DEBUG: TESTING PAGING
-    void * pageA = alloc_page();
-    printToscreen("Allocated Memory to Page-A With Adress:",0x0F);
-    cursor_y++;
-    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageA);
+    vga_clear();
+    vga_print(0, 1, "Before Paging!", 0x0f);
+
+    paging_init();
+    vga_print(0, 3, "After Paging", 0x0f);
+
+    // Test: Allocate a page and use it through virtual address
+    void* test_page = alloc_page();
+    vga_print(0, 5, "Allocated page at:", 0x0F);
+    vga_print_hex(25, 5, (uint32_t)test_page);
+
+    // Write through virtual address (identity mapped)
+    int* ptr = (int*)test_page;
+    *ptr = 0xDEADBEEF;
+
+    // Read it back
+    vga_print(0, 6, "Read back value:", 0x0F);
+    vga_print_hex(25, 6, *ptr);
+
+    if (*ptr == 0xDEADBEEF) {
+        vga_print(0, 7, "SUCCESS! Paging works!", 0x0A);
+    }
     
-    void * pageB = alloc_page();
-    printToscreen("Allocated Memory to Page-B With Adress:",0x0F);
-    cursor_y++;
-    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageB);
-
-    free_page(pageA);
-    printToscreen("Freed PageA:",0x0F);
-    cursor_y++;
-    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageA);
-
-    void * pageC = alloc_page();
-    printToscreen("Allocated Memory to Page-C With Adress:",0x0F);
-    cursor_y++;
-    vga_print_hex(cursor_x,cursor_y,(uint32_t)pageC);
-
+    
     // print_header(); // to print first shell header
     // vga_print(0, 1, "IDT initialized, interrupts enabled!", color);
     

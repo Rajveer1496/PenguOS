@@ -6,7 +6,9 @@ section .text
 ; Write a byte to an I/O port
 global outb
 outb:
+    ;first parameter
     mov dx, [esp + 4]    ; port number (16-bit)
+    ;second parameter
     mov al, [esp + 8]    ; value to write (8-bit)
     out dx, al           ; Send AL to port DX
     ret
