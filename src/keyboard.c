@@ -52,7 +52,7 @@ void keyboard_handler(void) {
     // Read scancode from keyboard
     uint8_t scancode = inb(KEYBOARD_DATA_PORT);
 
-    vga_print_hex(10,22, scancode);//DEBUG
+    // vga_print_hex(10,22, scancode);//DEBUG
     
     //SHIFT Handling
         if((scancode == 0x2A) || (scancode == 0x36)){ //press (Left and right both shifts)

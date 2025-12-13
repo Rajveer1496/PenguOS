@@ -24,6 +24,9 @@ struct idt_ptr idtp;
 // External assembly functions (we'll write these next)
 extern void idt_load(uint32_t);
 
+//Timer Counter
+uint32_t timer = 0;
+
 // Set an IDT entry
 void idt_set_gate(uint8_t num, uint32_t handler, uint16_t selector, uint8_t flags) {
     idt[num].offset_low = handler & 0xFFFF;         // Lower 16 bits
@@ -163,15 +166,18 @@ extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 // C interrupt handler - called from assembly
 void interrupt_handler(uint32_t int_no) {
     
-    // DBUG: show interrupt number on screen
-    // vga_print_hex(60, 0, int_no); //to show the interrupt number
-
-    // int_no = 33; //DEBUG: but if we purposefully set it the keyboard starts to work, cuz it called keyboard handler
-    if (int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
+    if(int_no == 32){
+        if(timer < 0xFFFFFFFF) timer++;
+        else timer =0;
+        
+        vga_print_hex(15, 15, timer);
+        pic_send_eoi(0);
+    }
+    else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
             keyboard_handler();
-    } 
+    }
     // Handle all other hardware IRQs (just acknowledge them)
-    else if (int_no >= 32 && int_no < 48 && int_no != 33) {
+    else if (int_no >= 34 && int_no < 48) {
         pic_send_eoi(int_no - 32);  // Send EOI for unhandled IRQs
     }
     // For CPU exceptions (0-31), do nothing for now

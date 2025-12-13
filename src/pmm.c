@@ -71,3 +71,34 @@ void page_init(){
         set_page_inUse(i);
     }
 }
+
+void* alloc_continous_pages(uint32_t count){
+    uint32_t pagenum = 0;
+    while(pagenum < maxPages-count){ //make sure we have enough pages
+        outer:
+        if(!check_page_usage(pagenum)){ //first unused page
+            for(int i=0;i<count;i++){//check next pages for continous block
+                if(check_page_usage(pagenum + i)){ //search in next space if any used page found in between
+                    pagenum = pagenum + i;
+                    goto outer;
+                }
+            }
+            //if continous block found
+            for(int i=0;i<count;i++){//mark whole block in use
+                set_page_inUse(pagenum+i);
+            }
+            return (void *)(4096 * pagenum); //Actual Physical adress of the page
+        }
+        pagenum++;
+    }
+    return NULL;
+}
+
+void free_continous_pages(void *address,uint32_t count){
+    uint32_t addr = (uint32_t)address; //convert pointer to int, for address
+    uint32_t pageNo = addr/4096;
+
+    for(int i=0;i<count;i++){ //free the whole continous block
+        set_page_free(pageNo + i);
+    }
+}

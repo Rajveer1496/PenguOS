@@ -69,10 +69,8 @@ void set_mode_13h(){
     }
 
     //Initializing the buffer - Black screen
-    for(int i = 0; i < WIDTH; i++) {
-        for(int j=0 ; j<HEIGHT; j++){
-            write_pixel(i,j,0x0);
-        }
+    for(int i = 0; i < WIDTH * HEIGHT; i++) {
+        buffer[i] = 0x0;
     }
 
     // Enable video display
