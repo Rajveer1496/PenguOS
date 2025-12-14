@@ -118,7 +118,7 @@ void kernel_main(void) {
     // print_header(); // to print first shell header
 
     //Switching to graphics mode
-    // set_mode_13h();
+    set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     //testing
@@ -134,24 +134,24 @@ void kernel_main(void) {
     serial_print("Backbuffer implimentation sucessfull!\n");
 
     //Debug
-    vga_print(0, 15, "timer(on inter)", 0x0E);
-    vga_print(2, 17, "last_second:", 0x0E);
-    vga_print(2, 18, "timer:", 0x0E);
-    vga_print(2, 19, "last_second + 60:", 0x0E);
+    // vga_print(0, 15, "timer(on inter)", 0x0E);
+    // vga_print(2, 17, "last_second:", 0x0E);
+    // vga_print(2, 18, "timer:", 0x0E);
+    // vga_print(2, 19, "last_second + 60:", 0x0E);
 
     //Testing Timer
-    uint32_t last_second = 0;
-    while(1){
-    vga_print_hex(15, 17, last_second);
-    vga_print_hex(15, 18, timer);
-    vga_print_hex(20, 19, last_second + 60);
+    // uint32_t last_second = 0;
+    // while(1){
+    // vga_print_hex(15, 17, last_second);
+    // vga_print_hex(15, 18, timer);
+    // vga_print_hex(20, 19, last_second + 60);
     
-    if(timer >= last_second + 60){
-        printToscreen("A second Elapsed!",0x0E);
-        serial_print("A second Elapsed!\n");
-        last_second = timer;
-    } 
-    }
+    // if(timer >= last_second + 60){
+    //     printToscreen("A second Elapsed!",0x0E);
+    //     serial_print("A second Elapsed!\n");
+    //     last_second = timer;
+    // } 
+    // }
 
     serial_print("\n");
     

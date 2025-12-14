@@ -170,7 +170,7 @@ void interrupt_handler(uint32_t int_no) {
         if(timer < 0xFFFFFFFF) timer++;
         else timer =0;
         
-        vga_print_hex(15, 15, timer);
+        // vga_print_hex(15, 15, timer);
         pic_send_eoi(0);
     }
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)

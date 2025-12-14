@@ -12,11 +12,15 @@ extern void serial_print(const char* str);
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern uint8_t inb(uint16_t port); //to read data from port 
 
+uint16_t current_tps;
+
 void setTPS(uint16_t TPS){
     if(TPS > BASE_FREQUENCY){
         serial_print("Error: TPS > Base Frquency of PIT!");
         return;
     }
+
+    current_tps = TPS;
 
     uint16_t divisor = BASE_FREQUENCY/TPS;
 
