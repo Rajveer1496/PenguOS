@@ -17,6 +17,10 @@ void addCtoBuffer(char c, char *str); //to add a char to a string buffer
 void RemoveCbuffer(char *str); // to remove a char from string
 void ClearStrBuffer(char *str); // to clear entire string buffer
 
+//Animation cursor
+extern int anim_cursor_x;
+extern int anim_cursor_y;
+
 #define KEYBOARD_DATA_PORT 0x60
 
 // Simple US keyboard scancode to ASCII table (only printable keys)
@@ -77,14 +81,24 @@ void keyboard_handler(void) {
 
     
     if (!(scancode & 0x80)) { // Only handle key press events (bit 7 = 0 means key pressed)
-        //Arrow Keys handling (No arrow keys for now, Will impliment later)
         
-        // if(scancode == 0x48) cursor_y--; //up arrow
-        // if(scancode == 0x50) cursor_y++; //down arrow
-
-        if(scancode == 0x4B && cursor_x>10) cursor_x--; //left arrow
-        if(scancode == 0x4D) cursor_x++; //right arrow
-
+        //Arrow Keys handling
+        if(scancode == 0x48) {//up arrow
+            // cursor_y--;
+            anim_cursor_y--;
+        } 
+        if(scancode == 0x50){ //down arrow
+            // cursor_y++;
+            anim_cursor_y++;
+        } 
+        if(scancode == 0x4B){//left arrow
+            if(cursor_x > 10)cursor_x--;
+            anim_cursor_x--;
+        } 
+        if(scancode == 0x4D) { //right arrow
+            cursor_x++;
+            anim_cursor_x++;
+        }
 
         // Convert scancode to ASCII
         if (scancode < sizeof(scancode_to_ascii)) {
