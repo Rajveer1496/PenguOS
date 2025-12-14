@@ -76,7 +76,7 @@ void animation(){
 }
 
 //---HELPER FUNCTIONS----
-void vga_draw(){
+void vga_draw_init(){
     backBuffer = (uint8_t *)alloc_continous_pages(16); //we need a 64KB buffer
 
     //Clear BackBuffer!
@@ -87,7 +87,7 @@ void vga_draw(){
 
     vga_flipBuffer();
 
-    animation();
+    // animation();
 }
 
 void vga_flipBuffer(){
@@ -95,7 +95,7 @@ void vga_flipBuffer(){
 }
 
 void write_pixel_BackBuffer(int x, int y, uint8_t color){
-    if(x<WIDTH && y <HEIGHT){
+    if(x<WIDTH && y <HEIGHT && x>=0 && y>=0){ //screen is from 0 to 319 in X
     int index = (WIDTH * y) + x;
     backBuffer[index] = color;
     }

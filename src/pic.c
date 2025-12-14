@@ -18,12 +18,20 @@
 extern void outb(uint16_t port, uint8_t value);
 extern uint8_t inb(uint16_t port);
 
+//serial debug functions
+extern void serial_print(const char* str);
+
+void pic_unmask(uint32_t irqNo);
+
+uint8_t mask1;
+uint8_t mask2;
+
 // Remap the PIC to use interrupts 32-47 instead of 0-15
 // (We need to remap because 0-15 conflict with CPU exceptions!)
 void pic_remap(void) {
     // Save masks
-    uint8_t mask1 = inb(PIC1_DATA);
-    uint8_t mask2 = inb(PIC2_DATA);
+    mask1 = inb(PIC1_DATA);
+    mask2 = inb(PIC2_DATA);
     
     // Start initialization sequence
     outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
@@ -42,7 +50,7 @@ void pic_remap(void) {
     // Set mode to 8086
     outb(PIC1_DATA, ICW4_8086);
     outb(PIC2_DATA, ICW4_8086);
-    
+
     // Restore masks
     outb(PIC1_DATA, mask1);
     outb(PIC2_DATA, mask2);
@@ -57,4 +65,22 @@ void pic_send_eoi(uint8_t irq) {
     
     // Always send EOI to master
     outb(PIC1_COMMAND, PIC_EOI);
+}
+
+
+/*
+Bit = 1 in mask register means IRQ is MASKED (disabled)
+Bit = 0 in mask register means IRQ is UNMASKED (enabled)
+*/
+
+void pic_unmask(uint32_t irqNo){
+    if(irqNo <= 7){
+        mask1 = mask1 & ~(1<< irqNo);
+        outb(PIC1_DATA, mask1);
+    }else if(irqNo >7 && irqNo<=15){
+        mask2 = mask2 & ~(1<<(irqNo - 8));
+        outb(PIC2_DATA, mask2);
+    }else{
+        serial_print("ERROR: Bad IRQ Number!\n");
+    }
 }

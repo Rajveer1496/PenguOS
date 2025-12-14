@@ -39,9 +39,17 @@ extern void serial_print(const char* str);
 extern void set_mode_13h();
 extern void write_pixel(int x, int y, uint8_t color);
 //Draw
-extern void vga_draw();
+extern void vga_draw_init();
 extern void vga_flipBuffer();
 extern void write_pixel_BackBuffer(int x, int y, uint8_t color);
+
+//Mouse
+extern void mouse_init();
+
+//Hardware
+extern void pic_unmask(uint32_t irqNo);
+extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
+extern void outb(uint16_t port, uint8_t value); // to write data to a port
 
 
 // Helper function to write a character to VGA at position (x, y)
@@ -97,15 +105,36 @@ void kernel_main(void) {
     idt_init();
     serial_print("IDT initialized!\n");
 
+    
+    outb(0x21, 0xFF);  // Mask all IRQs on master (EXPERIMENT!)
+    outb(0xA1, 0xFF);  // Mask all IRQs on slave
     // Remap PIC
     pic_remap();
+    pic_unmask(1);   // Unmask Keyboard
+    pic_unmask(2);  // Unmask the cascade line
+
 
     //set timer to 60 TPS
     setTPS(60);
+
+    //enable mouse
+    mouse_init();
     
     // Enable interrupts!
     enable_interrupts();
     serial_print("Interrupts Enabled!\n");
+
+    
+
+    // Read actual PIC masks from hardware
+uint8_t actual_mask1 = inb(0x21);  // Master PIC
+uint8_t actual_mask2 = inb(0xA1);  // Slave PIC
+
+serial_print("Master PIC mask: ");
+vga_print_hex(0, 22, actual_mask1);
+serial_print("\nSlave PIC mask: ");
+vga_print_hex(0, 23, actual_mask2);
+serial_print("\n");
 
     //Initialize PMM (Physical Memory Manager)
     page_init();
@@ -118,7 +147,7 @@ void kernel_main(void) {
     // print_header(); // to print first shell header
 
     //Switching to graphics mode
-    set_mode_13h();
+    // set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     //testing
@@ -130,7 +159,7 @@ void kernel_main(void) {
 
   
     //Testing back buffer
-    vga_draw();
+    vga_draw_init();
     serial_print("Backbuffer implimentation sucessfull!\n");
 
     //Debug

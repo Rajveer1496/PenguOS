@@ -24,6 +24,9 @@ struct idt_ptr idtp;
 // External assembly functions (we'll write these next)
 extern void idt_load(uint32_t);
 
+//serial debug functions
+extern void serial_print(const char* str);
+
 //Timer Counter
 uint32_t timer = 0;
 
@@ -155,8 +158,11 @@ void idt_init(void) {
     idt_load((uint32_t)&idtp);
 }
 
-// External keyboard handler
+// External handlers
 extern void keyboard_handler(void);
+extern void mouse_handler();
+
+//Hardware
 extern void pic_send_eoi(uint8_t irq);
 
 
@@ -166,15 +172,22 @@ extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 // C interrupt handler - called from assembly
 void interrupt_handler(uint32_t int_no) {
     
+    if(int_no != 32){
+        // vga_print_hex(15, 17, int_no);
+    }
+
     if(int_no == 32){
         if(timer < 0xFFFFFFFF) timer++;
         else timer =0;
         
-        // vga_print_hex(15, 15, timer);
+        vga_print_hex(20, 1, timer);
         pic_send_eoi(0);
     }
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
-            keyboard_handler();
+        keyboard_handler();
+    }else if(int_no == 44){ // IRQ 12 = MOUSE
+        // serial_print("Mouseeeeeeee!\n");
+        mouse_handler();
     }
     // Handle all other hardware IRQs (just acknowledge them)
     else if (int_no >= 34 && int_no < 48) {

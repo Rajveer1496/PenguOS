@@ -78,7 +78,7 @@ void set_mode_13h(){
 }
 
 void write_pixel(int x, int y, uint8_t color){
-    if(x<WIDTH && y <HEIGHT){
+    if(x<WIDTH && y <HEIGHT && x>=0 && y>=0){
     int index = (WIDTH * y) + x;
     buffer[index] = color;
     }else serial_print("Error: Trying to print out of screen!\n");
