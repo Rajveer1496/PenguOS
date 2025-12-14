@@ -150,10 +150,7 @@ void kernel_main(void) {
         printToscreen("A second Elapsed!",0x0E);
         serial_print("A second Elapsed!\n");
         last_second = timer;
-    } else {
-        // int i=0;
-        volatile int i = 0; //TELL COMPILER TO DO NOT OPTIMIZE HERE, or due to bug it will remove whole while(1) loop!
-    }
+    } 
     }
 
     serial_print("\n");
