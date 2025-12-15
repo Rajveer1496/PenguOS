@@ -100,7 +100,8 @@ io.o: io.asm
 # Run in QEMU
 run: $(ISO)
 	# rm -rf $(OBJS) $(KERNEL_BIN)
-	qemu-system-i386 -cdrom $(ISO) -serial stdio
+	qemu-system-i386 -cdrom $(ISO) -serial stdio \
+    -display sdl,grab-mod=rctrl
 
 # Clean build artifacts
 clean:

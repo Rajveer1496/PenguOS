@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#define WIDTH 320
+#define HEIGHT 200
+
 #define MOUSE_COMMAND_STATUS_PORT 0x64
 #define DATA_PORT 0x60
 
@@ -11,6 +14,14 @@ extern void pic_unmask(uint32_t irqNo);
 
 //serial debug functions
 extern void serial_print(const char* str);
+
+//Vga Debug
+extern void vga_print_hex(int x, int y, uint32_t value); //for debug
+
+//Draw
+extern void vga_flipBuffer();
+extern void vga_clear_backBuffer();
+extern void draw_Rectangle_solid(int x,int y,int width,int height,uint8_t color);
 
 void wait_untill_controller_ready();
 void wait_untill_dataPort_ready();
@@ -30,6 +41,9 @@ void mouse_init(){
     outb(0x64, 0x60);  // Command: Write configuration
     wait_untill_controller_ready();
     outb(0x60, config);
+
+    pic_unmask(1);   // Unmask Keyboard
+    pic_unmask(2);  // Unmask the cascade line
 
     //Then unmask the IRQ 12 (Mouse)
     pic_unmask(12); //But IRQ 12 is unmasked by default by BIOS/GRUB
@@ -58,47 +72,127 @@ void mouse_init(){
     serial_print("Mouse is ON!\n");
 }
 
+//KEY STATUS VARIABLES
+int left_hold = 0;
+int right_hold = 0;
+int middle_hold = 0;
+
+//Mouse cursor variable
+int mouse_x=100;
+int mouse_y=0;
 
 int packet_counter = 0;
 uint8_t packet[3];
 void mouse_handler(){
-    serial_print("1\n");
-    serial_print("start of mouse_handler()\n");
-
     // Check if data is actually available
-    // wait_untill_controller_ready();
-   uint8_t status = inb(MOUSE_COMMAND_STATUS_PORT);
-   serial_print("2\n");
-if (!(status & 0x1)) {  // No data available
-    serial_print("3-no data\n");
-    pic_send_eoi(12);
-    return;
-}
-serial_print("4\n");
-if (!(status & 0x20)) {  // Bit 5 = 0, data is from keyboard, not mouse!
-    serial_print("5-keyboard data\n");
-    pic_send_eoi(12);
-    return;
-}
-serial_print("6\n");
+    uint8_t status = inb(MOUSE_COMMAND_STATUS_PORT);
+    if (!(status & 0x1)) {  // No data available
+        pic_send_eoi(12);
+        return;
+    }
 
-    
+    if (!(status & 0x20)) {  // Bit 5 = 0, data is from keyboard, not mouse!
+        pic_send_eoi(12);
+        return;
+    }
 
     wait_untill_dataPort_ready();
-    serial_print("7\n");
     packet[packet_counter] = inb(0x60);
-    serial_print("8\n");
     pic_send_eoi(12); //We are done with interrupt (CPU dont accepts new interrupts untill one interrupt is not handled (untill iret is not called))
     if(packet_counter==2) goto process_packets;
-    serial_print("9-Read Next packet\n");
     packet_counter++;
     return;
     
+//---PROCESS---
     process_packets:
-    serial_print("10\n");
     packet_counter=0;
-    serial_print("11\n");
-    serial_print("Mouseeeeeeee!\n");
+
+    //---KEY STATUS---
+    //Left key
+    if(left_hold == 0){
+    if(packet[0] & 0x1){ //pressed
+        left_hold = 1;
+        serial_print("Left key pressed!\n");
+    }}
+    
+    if(left_hold == 1){
+    if(!(packet[0] & 0x1)){ //released
+        left_hold = 0;
+        serial_print("Left key Released!\n");
+    }}
+
+    //Right key
+    if(right_hold == 0){
+    if(packet[0] & (0x1<<1)){ //pressed
+        right_hold = 1;
+        serial_print("Right key pressed!\n");
+    }}
+    
+    if(right_hold == 1){
+    if(!(packet[0] & (0x1<<1))){ //released
+        right_hold = 0;
+        serial_print("Right key Released!\n");
+    }}
+
+    //middle key
+    if(middle_hold == 0){
+    if(packet[0] & (0x1<<2)){ //pressed
+        middle_hold = 1;
+        serial_print("Middle key pressed!\n");
+    }}
+    
+    if(middle_hold == 1){
+    if(!(packet[0] & (0x1<<2))){ //released
+        middle_hold = 0;
+        serial_print("Middle key Released!\n");
+    }}
+
+    //---MOUSE MOVEMENT---
+
+    //Moved left
+    if(packet[0] & (0x1<<4)){
+        if( mouse_x>0 &&(packet[1] !=0)){ //
+            // serial_print("Moved Left!\n");
+            mouse_x += (packet[1] - 256);
+        }
+    }
+
+    //Moved Right
+    if(!(packet[0] & (0x1<<4))){
+        if(mouse_x<WIDTH && (packet[1] !=0)){  //
+            // serial_print("Moved Right!\n");
+            mouse_x += (packet[1]);
+        }
+    }
+
+    int inv_sensitivity = 100; //y is moving too much, so to slow it down
+    //Moved Down
+    if(packet[0] & (0x1<<5)){
+        if(mouse_y<HEIGHT && (packet[2] !=0)){  //
+            // serial_print("Moved Down!\n");
+            mouse_y += (packet[2])/inv_sensitivity;
+        }
+    }
+
+    //Moved UP
+    if(!(packet[0] & (0x1<<5))){
+        if(mouse_y >0 && (packet[2] !=0)){ //
+            // serial_print("Moved UP!\n");
+            mouse_y += (packet[2] - 256)/inv_sensitivity;
+        }
+    }
+
+
+    vga_print_hex(10,10,mouse_x);
+    vga_print_hex(10, 12, mouse_y);
+
+    //---KEY ACTIONS---
+
+    vga_clear_backBuffer();
+    draw_Rectangle_solid(mouse_x,mouse_y,5,5,0x0D);
+    vga_flipBuffer();
+
+
     //rest of code to process packets
 }
 
@@ -116,3 +210,11 @@ void wait_untill_dataPort_ready(){
         if(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1) break; //0th bit = 1 tells that data is ready to be read in Data port
     }
 }
+
+
+/*
+CHECK LIST
+
+Mouse left/right/middle click - trigger on release
+Mouse left/right key/middle hold
+*/

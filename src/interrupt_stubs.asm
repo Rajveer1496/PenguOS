@@ -118,7 +118,7 @@ ISR_NOERR 31    ; Reserved
 ; Hardware IRQs (32-47)
 ; IRQ 0-15 get mapped to interrupts 32-47
 IRQ 0, 32       ; Timer
-; IRQ 1, 33       ; Keyboard
+IRQ 1, 33       ; Keyboard
 IRQ 2, 34       ; Cascade (used internally)
 IRQ 3, 35       ; COM2
 IRQ 4, 36       ; COM1
@@ -129,28 +129,7 @@ IRQ 8, 40       ; CMOS real-time clock
 IRQ 9, 41       ; Free
 IRQ 10, 42      ; Free
 IRQ 11, 43      ; Free
-; IRQ 12, 44      ; PS/2 Mouse
+IRQ 12, 44      ; PS/2 Mouse
 IRQ 13, 45      ; FPU
 IRQ 14, 46      ; Primary ATA
 IRQ 15, 47      ; Secondary ATA
-
-
-;for keyboard
-global irq1
-irq1:
-    push 0                 ; Dummy error code
-    push 33                ; Push interrupt number (32 + IRQ number)
-    ; call JustPrint
-    jmp interrupt_common
-
-; for mouse
-global irq12
-irq12:
-    call JustPrint
-    push 0                 ; Dummy error code
-    push 44                ; Push interrupt number (32 + IRQ number)
-    call JustPrint
-    jmp interrupt_common
-
-;ISSUE: on mouse click it is not calling the irq12 !
-;SOLUTION: Have to enable it in PS/2 controler and unmask cascade line

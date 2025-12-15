@@ -100,20 +100,13 @@ void kernel_main(void) {
     serial_init();
     serial_print("Serial Port is initialized!\n");
 
-    
     // Initialize IDT
     idt_init();
     serial_print("IDT initialized!\n");
 
-    
-    outb(0x21, 0xFF);  // Mask all IRQs on master (EXPERIMENT!)
-    outb(0xA1, 0xFF);  // Mask all IRQs on slave
     // Remap PIC
     pic_remap();
-    pic_unmask(1);   // Unmask Keyboard
-    pic_unmask(2);  // Unmask the cascade line
-
-
+    
     //set timer to 60 TPS
     setTPS(60);
 
@@ -123,18 +116,6 @@ void kernel_main(void) {
     // Enable interrupts!
     enable_interrupts();
     serial_print("Interrupts Enabled!\n");
-
-    
-
-    // Read actual PIC masks from hardware
-uint8_t actual_mask1 = inb(0x21);  // Master PIC
-uint8_t actual_mask2 = inb(0xA1);  // Slave PIC
-
-serial_print("Master PIC mask: ");
-vga_print_hex(0, 22, actual_mask1);
-serial_print("\nSlave PIC mask: ");
-vga_print_hex(0, 23, actual_mask2);
-serial_print("\n");
 
     //Initialize PMM (Physical Memory Manager)
     page_init();
@@ -147,7 +128,7 @@ serial_print("\n");
     // print_header(); // to print first shell header
 
     //Switching to graphics mode
-    // set_mode_13h();
+    set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     //testing
