@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "graphics.h"
+#include "debug.h"
 
 #define WIDTH 320
 #define HEIGHT 200
@@ -13,32 +15,7 @@ extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern void pic_send_eoi(uint8_t irq);
 extern void pic_unmask(uint32_t irqNo);
 
-//serial debug functions
-extern void serial_print(const char* str);
-
-//Vga Debug
-extern void vga_print_hex(int x, int y, uint32_t value); //for debug
-
-//Draw
-extern void vga_flipBuffer();
-extern void vga_clear_backBuffer();
-extern void draw_Rectangle_solid(int x,int y,int width,int height,uint8_t color);
-
-//image helpers
-extern uint8_t * image_canvas_new(uint32_t width, uint32_t height);
-extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
-extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
-extern void update_mouse();
-
-//TEMPPP
-struct image{
-    uint8_t* img;
-    int screen_x;
-    int screen_y;
-};
-
-struct image roxo;
-int image_hold = 0;
+struct image roxo; //TEMP
 
 void wait_untill_controller_ready();
 void wait_untill_dataPort_ready();
@@ -211,22 +188,8 @@ void mouse_handler(){
     //---KEY ACTIONS---
 
     vga_clear_backBuffer();
-    // image_paste_backBuffer(0,0,(uint16_t *)roxo.img);
-    //Move image
-    if(left_hold && (mouse_x>roxo.screen_x) && (mouse_x<roxo.screen_x + 50) && (mouse_y>roxo.screen_y) && (mouse_y<roxo.screen_y+20)){
-        image_hold = 1;
-    }else if(!left_hold){
-        image_hold = 0;
-    }
 
-    if(image_hold){
-        image_paste_backBuffer(mouse_x,mouse_y,(uint16_t *)roxo.img);
-        roxo.screen_x = mouse_x;
-        roxo.screen_y = mouse_y;
-    }
-
-
-    image_paste_backBuffer(roxo.screen_x,roxo.screen_y,(uint16_t *)roxo.img);
+    image_update(&roxo);
     
     //Update cursor
     update_mouse();

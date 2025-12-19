@@ -1,5 +1,6 @@
 ;paging.asm - to enable paging
 
+
 section .text
 
 global enable_paging

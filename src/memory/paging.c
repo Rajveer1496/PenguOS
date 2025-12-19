@@ -1,4 +1,5 @@
 #include<stdint.h>
+#include "memory.h"
 
 #define PRESENT 0x1
 #define WRITABLE 0x2

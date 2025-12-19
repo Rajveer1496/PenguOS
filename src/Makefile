@@ -7,7 +7,7 @@ LD = ld
 
 # Flags for each tool
 ASMFLAGS = -f elf32
-CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -O0 -Wall -Wextra
+CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug
 LDFLAGS = -m elf_i386 -T linker.ld
 
 # Output files

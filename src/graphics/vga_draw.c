@@ -1,4 +1,7 @@
 #include <stdint.h>
+#include "graphics.h"
+#include "memory.h"
+#include "debug.h"
 
 #define VGA_GRAPHICS_MEMORY 0xA0000
 #define WIDTH 320
@@ -13,16 +16,6 @@ extern uint16_t current_tps;
 int anim_cursor_x = 0;
 int anim_cursor_y = 0;
 
-//The screenbuffer functions
-extern void write_pixel(int x, int y, uint8_t color);
-
-//serial debug functions
-extern void serial_print(const char* str);
-
-//The memory management functions
-extern void* alloc_continous_pages(uint32_t count);
-extern void free_continous_pages(void *address,uint32_t count);
-extern void memcpy_fast(void* src, void* dest,uint32_t n);
 
 void write_pixel_BackBuffer(int x, int y, uint8_t color);
 void vga_flipBuffer();

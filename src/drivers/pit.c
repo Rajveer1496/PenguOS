@@ -1,13 +1,11 @@
 //programmable interval timer
 
 #include<stdint.h>
+#include "debug.h"
 
 #define PIT_DATA_PORT 0x40
 #define PIT_COMMAND_PORT 0x43
 #define BASE_FREQUENCY 1193182 //1.2 million ticks per second
-
-//serial debug functions
-extern void serial_print(const char* str);
 
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern uint8_t inb(uint16_t port); //to read data from port 

@@ -1,4 +1,7 @@
 #include <stdint.h>
+#include "graphics.h"
+#include "memory.h"
+#include "debug.h"
 
 /*
 ----IMAGE FORMAT---
@@ -17,22 +20,13 @@ Height: 200
 Total = 64000 bits ~ 63 KB ~ 16 pages 
 */
 
-//Memory management
-extern void* alloc_continous_pages(uint32_t count);
-extern void free_continous_pages(void *address,uint32_t count);
-extern void memInit_fast(void* ptr, uint32_t Nobytes);
 
-//Vga Debug
-extern void vga_print_hex(int x, int y, uint32_t value); //for debug
+//Mouse
+extern int mouse_x;
+extern int mouse_y;
+extern int left_hold;
 
-//serial debug functions
-extern void serial_print(const char* str);
-
-//Graphics
-extern void vga_flipBuffer();
-extern void write_pixel_BackBuffer(int x, int y, uint8_t color);
-//Draw
-extern void vga_clear_backBuffer();
+int image_hold =0;
 
 
 uint8_t * image_canvas_new(uint16_t width, uint16_t height){
@@ -111,17 +105,8 @@ void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr){
     vga_flipBuffer();
 }
 
-//Move image
-void image_move(){
-
-}
-
-
 
 ///---CURSOR UPDATE---
-//Mouse cords
-extern int mouse_x;
-extern int mouse_y;
 
 //the pointer
 static const uint8_t mouse_ptr[] = {
@@ -154,4 +139,23 @@ void update_mouse(){
     }
 
     vga_flipBuffer();
+}
+
+
+//---Image Update--- (drag with mouse)
+//ptr is pointer to struct, not struct it self
+void image_update(struct image *ptr){
+    if(left_hold && (mouse_x>(*ptr).screen_x) && (mouse_x<(*ptr).screen_x + 50) && (mouse_y>(*ptr).screen_y) && (mouse_y<(*ptr).screen_y+20)){
+        image_hold = 1;
+    }else if(!left_hold){
+        image_hold = 0;
+    }
+
+    if(image_hold){
+        image_paste_backBuffer(mouse_x,mouse_y,(uint16_t *)(*ptr).img);
+        (*ptr).screen_x = mouse_x;
+        (*ptr).screen_y = mouse_y;
+    }
+
+    image_paste_backBuffer((*ptr).screen_x,(*ptr).screen_y,(uint16_t *)(*ptr).img);
 }

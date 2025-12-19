@@ -1,6 +1,7 @@
 // idt.c - Interrupt Descriptor Table implementation
 
 #include <stdint.h>
+#include "debug.h"
 
 // IDT entry structure (8 bytes)
 struct idt_entry {
@@ -24,8 +25,6 @@ struct idt_ptr idtp;
 // External assembly functions (we'll write these next)
 extern void idt_load(uint32_t);
 
-//serial debug functions
-extern void serial_print(const char* str);
 
 //Timer Counter
 uint32_t timer = 0;

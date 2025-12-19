@@ -4,6 +4,8 @@
 * Multi windows (movable with depth)
 * Memory usage visualizer (pages)
 
+* Lookup table to move windows (Frames, unique id)
+
 
 
 * Multiplayer Kachi fool

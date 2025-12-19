@@ -1,6 +1,7 @@
 // keyboard.c - Simple keyboard driver
 
 #include <stdint.h>
+#include "debug.h"
 
 #define cmd_buffer_size 80
 
@@ -8,9 +9,6 @@
 extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 extern void pic_send_eoi(uint8_t irq);
-extern void vga_putchar(int x, int y, char c, unsigned char color);
-extern void vga_print_hex(int x, int y, uint32_t value); //for debug
-extern void vga_print(int x, int y, const char *str, unsigned char color); //for debug
 extern void shellExecute(const char *str);
 void print_header(); //to print header
 void addCtoBuffer(char c, char *str); //to add a char to a string buffer

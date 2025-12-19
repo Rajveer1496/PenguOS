@@ -1,7 +1,8 @@
 // kernel.c - Our first C kernel!
 
-#include <stdint.h>   //for debug
+#include <stdint.h> 
 #include <stddef.h>
+#include "debug.h"
 
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000

@@ -1,4 +1,5 @@
 #include<stdint.h>
+#include "debug.h"
 
 #define DATA_PORT 0x3F8
 #define CONTROL 0x3F9

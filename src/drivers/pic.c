@@ -1,6 +1,7 @@
 // pic.c - Programmable Interrupt Controller setup
 
 #include <stdint.h>
+#include "debug.h"
 
 // PIC ports
 #define PIC1_COMMAND 0x20
@@ -18,8 +19,6 @@
 extern void outb(uint16_t port, uint8_t value);
 extern uint8_t inb(uint16_t port);
 
-//serial debug functions
-extern void serial_print(const char* str);
 
 void pic_unmask(uint32_t irqNo);
 

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "graphics.h"
 
 #define WIDTH 320
 #define HEIGHT 200
