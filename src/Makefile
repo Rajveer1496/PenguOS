@@ -37,67 +37,67 @@ $(KERNEL_BIN): $(OBJS)
 boot.o: boot.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-enable_paging.o: enable_paging.asm
+enable_paging.o: memory/enable_paging.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Compile C file
 kernel.o: kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-paging.o: paging.c
+paging.o: memory/paging.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-serial.o: serial.c
+serial.o: debug/serial.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-vga_graphics.o: vga_graphics.c
+vga_graphics.o: graphics/vga_graphics.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-vga_draw.o: vga_draw.c
+vga_draw.o: graphics/vga_draw.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-memtools.o: memtools.c
+memtools.o: memory/memtools.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-pit.o: pit.c
+pit.o: drivers/pit.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-image_helper.o: image_helper.c
+image_helper.o: graphics/image_helper.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-mouse.o: mouse.c
+mouse.o: drivers/mouse.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile shell C file
-shell.o: shell.c
+shell.o: debug/shell.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile paging file
-pmm.o: pmm.c
+pmm.o: memory/pmm.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile IDT C file
-idt.o: idt.c
+idt.o: drivers/idt.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile PIC C file
-pic.o: pic.c
+pic.o: drivers/pic.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile keyboard C file
-keyboard.o: keyboard.c
+keyboard.o: drivers/keyboard.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile IDT loader assembly
-idt_load.o: idt_load.asm
+idt_load.o: drivers/idt_load.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Compile interrupt stubs assembly
-interrupt_stubs.o: interrupt_stubs.asm
+interrupt_stubs.o: drivers/interrupt_stubs.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Compile I/O assembly
-io.o: io.asm
+io.o: drivers/io.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Run in QEMU
