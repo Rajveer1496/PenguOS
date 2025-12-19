@@ -1,6 +1,7 @@
 // kernel.c - Our first C kernel!
 
 #include <stdint.h>   //for debug
+#include <stddef.h>
 
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
@@ -42,6 +43,10 @@ extern void write_pixel(int x, int y, uint8_t color);
 extern void vga_draw_init();
 extern void vga_flipBuffer();
 extern void write_pixel_BackBuffer(int x, int y, uint8_t color);
+//Image Helper
+extern uint8_t * image_canvas_new(uint32_t width, uint32_t height);
+extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
+extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
 
 //Mouse
 extern void mouse_init();
@@ -106,16 +111,6 @@ void kernel_main(void) {
 
     // Remap PIC
     pic_remap();
-    
-    //set timer to 60 TPS
-    setTPS(60);
-
-    //enable mouse
-    mouse_init();
-    
-    // Enable interrupts!
-    enable_interrupts();
-    serial_print("Interrupts Enabled!\n");
 
     //Initialize PMM (Physical Memory Manager)
     page_init();
@@ -127,6 +122,7 @@ void kernel_main(void) {
 
     // print_header(); // to print first shell header
 
+
     //Switching to graphics mode
     set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
@@ -137,34 +133,25 @@ void kernel_main(void) {
             write_pixel(i,j,(i+j)*i);
         }
     }
-
   
     //Testing back buffer
     vga_draw_init();
     serial_print("Backbuffer implimentation sucessfull!\n");
 
-    //Debug
-    // vga_print(0, 15, "timer(on inter)", 0x0E);
-    // vga_print(2, 17, "last_second:", 0x0E);
-    // vga_print(2, 18, "timer:", 0x0E);
-    // vga_print(2, 19, "last_second + 60:", 0x0E);
-
-    //Testing Timer
-    // uint32_t last_second = 0;
-    // while(1){
-    // vga_print_hex(15, 17, last_second);
-    // vga_print_hex(15, 18, timer);
-    // vga_print_hex(20, 19, last_second + 60);
-    
-    // if(timer >= last_second + 60){
-    //     printToscreen("A second Elapsed!",0x0E);
-    //     serial_print("A second Elapsed!\n");
-    //     last_second = timer;
-    // } 
-    // }
-
     serial_print("\n");
+
+    //set timer to 60 TPS
+    setTPS(60);
+
+    //enable mouse
+    mouse_init();
     
+    // Enable interrupts!
+    enable_interrupts();
+    serial_print("Interrupts Enabled!\n");
+
+    
+
 
     // Hang forever (interrupts will still work!)
     while (1) {

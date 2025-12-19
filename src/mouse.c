@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 #define WIDTH 320
 #define HEIGHT 200
@@ -22,6 +23,12 @@ extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 extern void vga_flipBuffer();
 extern void vga_clear_backBuffer();
 extern void draw_Rectangle_solid(int x,int y,int width,int height,uint8_t color);
+
+//image helpers
+extern uint8_t * image_canvas_new(uint32_t width, uint32_t height);
+extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
+extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
+extern void update_mouse();
 
 void wait_untill_controller_ready();
 void wait_untill_dataPort_ready();
@@ -182,16 +189,9 @@ void mouse_handler(){
         }
     }
 
-
-    vga_print_hex(10,10,mouse_x);
-    vga_print_hex(10, 12, mouse_y);
-
     //---KEY ACTIONS---
 
-    vga_clear_backBuffer();
-    draw_Rectangle_solid(mouse_x,mouse_y,5,5,0x0D);
-    vga_flipBuffer();
-
+    update_mouse();
 
     //rest of code to process packets
 }
@@ -215,6 +215,5 @@ void wait_untill_dataPort_ready(){
 /*
 CHECK LIST
 
-Mouse left/right/middle click - trigger on release
-Mouse left/right key/middle hold
+
 */

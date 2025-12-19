@@ -82,8 +82,9 @@ void vga_draw_init(){
     //Clear BackBuffer!
     vga_clear_backBuffer();
 
-    draw_Rectangle_solid(0,0,100,50,0x0D);
-    draw_Rectangle_hollow(1,1,100,50,0x0E);
+    for(int i=24; i<64 ;i++){
+        draw_Rectangle_solid((i-24)*11,0,10,10,i);
+    }
 
     vga_flipBuffer();
 

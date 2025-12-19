@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o vga_draw.o memtools.o pit.o mouse.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o vga_draw.o memtools.o pit.o mouse.o image_helper.o
 
 # Default target - build everything
 all: $(ISO)
@@ -62,6 +62,9 @@ memtools.o: memtools.c
 pit.o: pit.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+image_helper.o: image_helper.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 mouse.o: mouse.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -99,9 +102,10 @@ io.o: io.asm
 
 # Run in QEMU
 run: $(ISO)
-	# rm -rf $(OBJS) $(KERNEL_BIN)
 	qemu-system-i386 -cdrom $(ISO) -serial stdio \
     -display sdl,grab-mod=rctrl
+
+	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
 
 # Clean build artifacts
 clean:
