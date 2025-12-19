@@ -111,6 +111,12 @@ void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr){
     vga_flipBuffer();
 }
 
+//Move image
+void image_move(){
+
+}
+
+
 
 ///---CURSOR UPDATE---
 //Mouse cords
@@ -137,8 +143,6 @@ static const uint8_t mouse_ptr[] = {
 };
 
 void update_mouse(){
-    vga_clear_backBuffer();
-
     int width = 30;
     int height = 15;
 

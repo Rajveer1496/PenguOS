@@ -30,6 +30,16 @@ extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
 extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
 extern void update_mouse();
 
+//TEMPPP
+struct image{
+    uint8_t* img;
+    int screen_x;
+    int screen_y;
+};
+
+struct image roxo;
+int image_hold = 0;
+
 void wait_untill_controller_ready();
 void wait_untill_dataPort_ready();
 
@@ -77,6 +87,15 @@ void mouse_init(){
     if(inb(DATA_PORT) != 0xFA) goto start_packet;
 
     serial_print("Mouse is ON!\n");
+
+    //TEMPP
+    roxo.img = image_canvas_new(50,50);
+    for(int i=4;i<2500;i++){
+        roxo.img[i] = 1;
+    }
+
+    roxo.screen_x = 0;
+    roxo.screen_y = 0;
 }
 
 //KEY STATUS VARIABLES
@@ -191,6 +210,25 @@ void mouse_handler(){
 
     //---KEY ACTIONS---
 
+    vga_clear_backBuffer();
+    // image_paste_backBuffer(0,0,(uint16_t *)roxo.img);
+    //Move image
+    if(left_hold && (mouse_x>roxo.screen_x) && (mouse_x<roxo.screen_x + 50) && (mouse_y>roxo.screen_y) && (mouse_y<roxo.screen_y+20)){
+        image_hold = 1;
+    }else if(!left_hold){
+        image_hold = 0;
+    }
+
+    if(image_hold){
+        image_paste_backBuffer(mouse_x,mouse_y,(uint16_t *)roxo.img);
+        roxo.screen_x = mouse_x;
+        roxo.screen_y = mouse_y;
+    }
+
+
+    image_paste_backBuffer(roxo.screen_x,roxo.screen_y,(uint16_t *)roxo.img);
+    
+    //Update cursor
     update_mouse();
 
     //rest of code to process packets
