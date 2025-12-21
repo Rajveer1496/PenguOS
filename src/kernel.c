@@ -3,6 +3,7 @@
 #include <stdint.h> 
 #include <stddef.h>
 #include "debug.h"
+#include "files.h"
 
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
@@ -122,6 +123,9 @@ void kernel_main(void) {
     serial_print("Paging Enabled!\n");
 
     // print_header(); // to print first shell header
+
+    //Start the disk
+    disk_init();
 
 
     //Switching to graphics mode

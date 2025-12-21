@@ -7,7 +7,7 @@ LD = ld
 
 # Flags for each tool
 ASMFLAGS = -f elf32
-CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug
+CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug -Ifile_system
 LDFLAGS = -m elf_i386 -T linker.ld
 
 # Output files
@@ -15,7 +15,7 @@ KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
 # Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o vga_draw.o memtools.o pit.o mouse.o image_helper.o
+OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o vga_draw.o memtools.o pit.o mouse.o image_helper.o disk_driver.o
 
 # Default target - build everything
 all: $(ISO)
@@ -66,6 +66,9 @@ image_helper.o: graphics/image_helper.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 mouse.o: drivers/mouse.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+disk_driver.o: file_system/disk_driver.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile shell C file

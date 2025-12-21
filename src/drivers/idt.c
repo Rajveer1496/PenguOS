@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "debug.h"
+#include "files.h"
 
 // IDT entry structure (8 bytes)
 struct idt_entry {
@@ -186,6 +187,9 @@ void interrupt_handler(uint32_t int_no) {
         keyboard_handler();
     }else if(int_no == 44){ // IRQ 12 = MOUSE
         mouse_handler();
+    }else if(int_no == 46){ // IRQ 14 = DISK
+        disk_ready = 1;
+        pic_send_eoi(14);
     }
     // Handle all other hardware IRQs (just acknowledge them)
     else if (int_no >= 34 && int_no < 48) {

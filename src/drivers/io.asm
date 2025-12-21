@@ -20,3 +20,21 @@ inb:
     mov dx, [esp + 4]    ; port number (16-bit)
     in al, dx            ; Read from port DX into AL
     ret                  ; Return value is in AL
+
+
+global outw
+outb:
+    ;first parameter
+    mov dx, [esp + 4]    ; port number (16-bit)
+    ;second parameter
+    mov ax, [esp + 8]    ; value to write (16-bit)
+    out dx, ax           ; Send AX to port DX
+    ret
+
+; uint16_t inw(uint16_t port)
+; Read a word (2 bytes) from an I/O port
+global inw
+inb:
+    mov dx, [esp + 4]    ; port number (16-bit)
+    in ax, dx            ; Read from port DX into AX
+    ret                  ; Return value is in AX
