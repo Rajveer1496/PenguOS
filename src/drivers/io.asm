@@ -23,7 +23,7 @@ inb:
 
 
 global outw
-outb:
+outw:
     ;first parameter
     mov dx, [esp + 4]    ; port number (16-bit)
     ;second parameter
@@ -34,7 +34,7 @@ outb:
 ; uint16_t inw(uint16_t port)
 ; Read a word (2 bytes) from an I/O port
 global inw
-inb:
+inw:
     mov dx, [esp + 4]    ; port number (16-bit)
     in ax, dx            ; Read from port DX into AX
     ret                  ; Return value is in AX

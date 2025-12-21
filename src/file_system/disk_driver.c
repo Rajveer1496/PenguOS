@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "files.h"
+#include "drivers.h"
 
 #define STATUS_COMMAND_PORT 0x1F7
 #define SECTOR_COUNT_PORT 0x1F2
@@ -9,10 +10,7 @@
 #define DRIVE_HEAD_BYTE 0x1F6
 #define DATA 0x1F0
 
-extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
-extern void outb(uint16_t port, uint8_t value); // to write data to a port
-extern uint16_t inw(uint16_t port);
-extern void outw(uint16_t port, uint16_t value);
+volatile int disk_ready = 0;
 
 int read_sector(uint32_t sectorNO, uint16_t * buffer){
     while(inb(STATUS_COMMAND_PORT) & 0x80); //wait while disk is busy
