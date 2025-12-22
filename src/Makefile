@@ -7,7 +7,7 @@ LD = ld
 
 # Flags for each tool
 ASMFLAGS = -f elf32
-CFLAGS = -m32 -ffreestanding -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug -Ifile_system -Idrivers
+CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug -Ifile_system -Idrivers
 LDFLAGS = -m elf_i386 -T linker.ld
 
 # Output files
@@ -27,7 +27,7 @@ $(ISO): $(KERNEL_BIN)
 	echo 'menuentry "PenguOS" {' > isodir/boot/grub/grub.cfg
 	echo '    multiboot /boot/$(KERNEL_BIN)' >> isodir/boot/grub/grub.cfg
 	echo '}' >> isodir/boot/grub/grub.cfg
-	grub2-mkrescue -o $(ISO) isodir
+	grub-mkrescue -o $(ISO) isodir
 
 # Link object files into kernel binary
 $(KERNEL_BIN): $(OBJS)
@@ -108,7 +108,7 @@ run: $(ISO)
 	qemu-system-i386 -cdrom $(ISO) -serial stdio \
     -display sdl,grab-mod=rctrl
 
-	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
+	#rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
 
 # Clean build artifacts
 clean:
