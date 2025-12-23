@@ -124,12 +124,11 @@ void kernel_main(void) {
 
     // print_header(); // to print first shell header
 
-    //Start the disk
-    disk_init();
+    
 
 
     //Switching to graphics mode
-    set_mode_13h();
+    // set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     //testing
@@ -155,7 +154,8 @@ void kernel_main(void) {
     enable_interrupts();
     serial_print("Interrupts Enabled!\n");
 
-    
+    //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
+    disk_init();
 
 
     // Hang forever (interrupts will still work!)

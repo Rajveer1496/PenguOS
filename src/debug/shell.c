@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "debug.h"
 
 extern void vga_print(int x, int y, const char *str, unsigned char color); //for debug
 extern void vga_clear();

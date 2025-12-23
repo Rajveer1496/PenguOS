@@ -27,7 +27,7 @@ $(ISO): $(KERNEL_BIN)
 	echo 'menuentry "PenguOS" {' > isodir/boot/grub/grub.cfg
 	echo '    multiboot /boot/$(KERNEL_BIN)' >> isodir/boot/grub/grub.cfg
 	echo '}' >> isodir/boot/grub/grub.cfg
-	grub-mkrescue -o $(ISO) isodir
+	grub2-mkrescue -o $(ISO) isodir
 
 # Link object files into kernel binary
 $(KERNEL_BIN): $(OBJS)
@@ -106,13 +106,17 @@ io.o: drivers/io.asm
 # Run in QEMU
 run: $(ISO)
 	qemu-system-i386 -cdrom $(ISO) -serial stdio \
-    -display sdl,grab-mod=rctrl
+    -display sdl,grab-mod=rctrl -drive file=disk.img,format=raw
 
 	#rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
 
 # Clean build artifacts
 clean:
 	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
+
+#create disk
+createdisk:
+	qemu-img create -f raw disk.img 1G
 
 # Phony targets (not actual files)
 .PHONY: all clean run

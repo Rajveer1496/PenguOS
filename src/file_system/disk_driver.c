@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "files.h"
 #include "drivers.h"
+#include "debug.h"
 
 #define STATUS_COMMAND_PORT 0x1F7
 #define SECTOR_COUNT_PORT 0x1F2
@@ -11,6 +12,9 @@
 #define DATA 0x1F0
 
 volatile int disk_ready = 0;
+uint16_t identity_buffer[256]; 
+char disk_name[21];
+uint32_t total_sectors;
 
 int read_sector(uint32_t sectorNO, uint16_t * buffer){
     while(inb(STATUS_COMMAND_PORT) & 0x80); //wait while disk is busy
@@ -43,4 +47,56 @@ int read_sector(uint32_t sectorNO, uint16_t * buffer){
 
 void disk_init(){
     pic_unmask(14);  // Enable ATA interrupts
+
+    while(inb(STATUS_COMMAND_PORT) & 0x80); //wait while disk is busy
+
+    uint8_t headByte = (0xE << 4);
+
+    outb(DRIVE_HEAD_BYTE,headByte); // FLAGS
+
+    uint8_t status = inb(STATUS_COMMAND_PORT);
+    if(status == 0xFF || status == 0x0){ //if no disk is connected then all values of port will be 0(ground) or 1(High)
+        serial_print("No disk is connected!\n");
+        return;
+    }
+
+    outb(STATUS_COMMAND_PORT,0xEC); //IDENTIFY command
+
+    while(!disk_ready); // wait for interrupt
+    disk_ready = 0;
+
+    //Error checking
+    if((inb(STATUS_COMMAND_PORT) & 0x01)){
+        serial_print("Error while Identifying disk!\n");
+        return;
+    }
+
+    while(!(inb(STATUS_COMMAND_PORT) & 0x08)); //check if asked data is ready or not
+    
+    for(int i=0;i<256;i++){
+        identity_buffer[i] = inw(DATA);
+    }
+
+    int local_counter=0;
+    for(int i=27;i<46;i++){ //storing disk name (while Un swapping words)
+        uint8_t lowerbyte = identity_buffer[i] & 0xFF;
+        uint8_t highbyte = (identity_buffer[i]>>8) & 0xFF;
+        disk_name[local_counter] = (char)(highbyte);
+        local_counter++;
+        disk_name[local_counter] = (char)lowerbyte;
+        local_counter++;
+    }
+    disk_name[20] = '\0';
+
+    total_sectors = (identity_buffer[61]<<16) | identity_buffer[60];
+    uint32_t sizeinMB = (total_sectors * 512)/(1024*1024);
+
+    vga_print(10,10,disk_name,0X0E);
+    vga_print_hex(10,11,total_sectors);
+    vga_print_hex(10,12,sizeinMB);
+
+    serial_print("Disk Name: ");
+    serial_print(disk_name);
+    serial_print("\n");
+    serial_print("Disk initialization Complete!");
 }
