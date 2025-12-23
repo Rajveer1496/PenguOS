@@ -7,15 +7,23 @@ LD = ld
 
 # Flags for each tool
 ASMFLAGS = -f elf32
-CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -fno-pie -O0 -Wall -Wextra -Igraphics -Imemory -Idebug -Ifile_system -Idrivers
+CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -fno-pie -O0 -Wall -Wextra
 LDFLAGS = -m elf_i386 -T linker.ld
+
+#FOR INCLUDE FLAG
+SUBDIRS = $(shell find . -type d) #Find all sub directories
+INCLUDES = $(addprefix -I,$(SUBDIRS))
 
 # Output files
 KERNEL_BIN = kernel.bin
 ISO = myos.iso
 
-# Object files
-OBJS = boot.o kernel.o idt.o idt_load.o interrupt_stubs.o pic.o io.o keyboard.o shell.o pmm.o paging.o enable_paging.o serial.o vga_graphics.o vga_draw.o memtools.o pit.o mouse.o image_helper.o disk_driver.o
+#All c and asm files
+C_SOURCES = $(shell find . -name '*.c')
+ASM_SOURCES = $(shell find . -name '*.asm')
+
+#changing .c from c files to .o (OBJECT FILES)
+OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) 
 
 # Default target - build everything
 all: $(ISO)
@@ -33,82 +41,23 @@ $(ISO): $(KERNEL_BIN)
 $(KERNEL_BIN): $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-# Compile assembly file
-boot.o: boot.asm
+#VPATH (tells make to look where for source files)
+VPATH = memory:debug:graphics:drivers:file_system
+
+#compile all c and asm files
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+%.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-enable_paging.o: memory/enable_paging.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
-
-# Compile C file
-kernel.o: kernel.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-paging.o: memory/paging.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-serial.o: debug/serial.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-vga_graphics.o: graphics/vga_graphics.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-vga_draw.o: graphics/vga_draw.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-memtools.o: memory/memtools.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-pit.o: drivers/pit.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-image_helper.o: graphics/image_helper.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-mouse.o: drivers/mouse.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-disk_driver.o: file_system/disk_driver.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile shell C file
-shell.o: debug/shell.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile paging file
-pmm.o: memory/pmm.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile IDT C file
-idt.o: drivers/idt.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile PIC C file
-pic.o: drivers/pic.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile keyboard C file
-keyboard.o: drivers/keyboard.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile IDT loader assembly
-idt_load.o: drivers/idt_load.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
-
-# Compile interrupt stubs assembly
-interrupt_stubs.o: drivers/interrupt_stubs.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
-
-# Compile I/O assembly
-io.o: drivers/io.asm
-	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Run in QEMU
 run: $(ISO)
 	qemu-system-i386 -cdrom $(ISO) -serial stdio \
     -display sdl,grab-mod=rctrl -drive file=disk.img,format=raw
 
-	#rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
+	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
 
 # Clean build artifacts
 clean:
@@ -120,3 +69,9 @@ createdisk:
 
 # Phony targets (not actual files)
 .PHONY: all clean run
+
+
+#---GUIDE---
+# $@ - represents the target (the thing being built, left side of : )
+# $< - represents the source file (right side of : )
+# $^ - represents all prerequisites (all files it takes, e.g: (obj) to compile kernel)
