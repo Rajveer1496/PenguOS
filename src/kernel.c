@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "debug.h"
 #include "files.h"
+#include "drivers.h"
 
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
@@ -13,10 +14,6 @@
 // VGA color codes
 #define COLOR_BLACK 0
 #define COLOR_WHITE 15
-
-//Timer
-extern void setTPS(uint16_t TPS);
-extern uint32_t timer;
 
 // External functions from other files
 extern void idt_init(void);
@@ -157,6 +154,29 @@ void kernel_main(void) {
     //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
     disk_init();
 
+
+//The read write test
+    uint16_t test_buffer[256];
+    uint16_t test_buffer2[256];
+// Fill with test data
+for(int i = 0; i < 256; i++) {
+    test_buffer[i] = i;
+}
+
+// Write to sector 100
+write_sector(100, test_buffer);
+
+// Read back
+read_sector(100, test_buffer2);
+
+// Verify
+for(int i = 0; i < 256; i++) {
+    if(test_buffer[i] != test_buffer2[i]) {
+        serial_print("MISMATCH!\n");
+    }
+}
+
+serial_print("NICEE");
 
     // Hang forever (interrupts will still work!)
     while (1) {

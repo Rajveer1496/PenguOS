@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include "debug.h"
 #include "files.h"
+#include "drivers.h"
+
+uint32_t timer = 0;
 
 // IDT entry structure (8 bytes)
 struct idt_entry {
@@ -25,10 +28,6 @@ struct idt_ptr idtp;
 
 // External assembly functions (we'll write these next)
 extern void idt_load(uint32_t);
-
-
-//Timer Counter
-uint32_t timer = 0;
 
 // Set an IDT entry
 void idt_set_gate(uint8_t num, uint32_t handler, uint16_t selector, uint8_t flags) {

@@ -7,4 +7,7 @@ extern uint16_t inw(uint16_t port);
 extern void outw(uint16_t port, uint16_t value);
 extern void pic_unmask(uint32_t irqNo);
 
+//TIMER
+extern void setTPS(uint16_t TPS);
+
 #endif
