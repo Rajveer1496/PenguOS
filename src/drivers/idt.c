@@ -170,12 +170,33 @@ extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 
 // C interrupt handler - called from assembly
 void interrupt_handler(uint32_t int_no) {
-    
+
+    if(int_no == 13) serial_print("->GPF\n");
+
     if(int_no != 32){
-        // vga_print_hex(15, 17, int_no);
+        vga_print_hex(10,14,int_no);
+    }
+    vga_print_hex(10,15,int_no);
+    
+   
+    if(int_no<32){
+        // serial_print("CPU EXCEPTION!\n");
+    if(int_no == 0) serial_print("EXC 0: DIV ZERO\n");
+    else if(int_no == 1) serial_print("EXC 1: DEBUG\n");
+    else if(int_no == 2) serial_print("EXC 2: NMI\n");
+    else if(int_no == 3) serial_print("EXC 3: BREAKPOINT\n");
+    else if(int_no == 4) serial_print("EXC 4: OVERFLOW\n");
+    else if(int_no == 5) serial_print("EXC 5: BOUND\n");
+    else if(int_no == 6) serial_print("EXC 6: INVALID OPCODE\n");
+    else if(int_no == 7) serial_print("EXC 7: NO FPU\n");
+    else if(int_no == 8) serial_print("EXC 8: DOUBLE FAULT\n");
+    else if(int_no == 13) serial_print("EXC 13: GPF\n");
+    else if(int_no == 14) serial_print("EXC 14: PAGE FAULT\n");
+    else serial_print("EXC OTHER\n");
     }
 
     if(int_no == 32){
+        // serial_print("TIMER!\n");
         if(timer < 0xFFFFFFFF) timer++;
         else timer =0;
         
@@ -184,6 +205,7 @@ void interrupt_handler(uint32_t int_no) {
     }
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
         keyboard_handler();
+        serial_print("KEY KEY KEY\n");
     }else if(int_no == 44){ // IRQ 12 = MOUSE
         mouse_handler();
     }else if(int_no == 46){ // IRQ 14 = DISK
@@ -196,8 +218,6 @@ void interrupt_handler(uint32_t int_no) {
     }
     // For CPU exceptions (0-31), do nothing for now
 
-    // DEBUG: show we got here
-    // vga_putchar(70, 0, 'K', 0x0F);  // Print 'K' in top-right corner
 }
 
 /* WHAT HAPPNES WHEN I PRESS A KEY

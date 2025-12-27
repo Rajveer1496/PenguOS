@@ -54,3 +54,25 @@ void serial_print(const char* str){
         i++;
     }
 }
+
+void serial_print_number(uint32_t number){ //supports at max 9 digits due to int limits (the int i)
+    char buffer[100];
+    int j=0;
+    int c;
+    uint32_t i=10;
+    int b = (number % i);
+    buffer[j] = (char)(b+48);
+    do{
+        j++;
+        i = i*10;
+        c = ((number % i) - b)/(i/10);
+        b = (number % i);
+        buffer[j] = (char)(c+48);
+    }while((number % i)!= number);
+ 
+    for(;j>=0;j--){
+        serial_write_char(buffer[j]);
+    }
+    serial_write_char('\r');
+    serial_write_char('\n');
+}

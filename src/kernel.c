@@ -23,6 +23,11 @@ extern void printToscreen(const char *str,unsigned char color);
 extern int cursor_x;
 extern int cursor_y;
 
+extern uint32_t timer;
+
+//Disable APIC
+extern void disable_apic();
+
 //Paging functions
 extern void page_init();
 extern void* alloc_page();
@@ -119,13 +124,10 @@ void kernel_main(void) {
     paging_init();
     serial_print("Paging Enabled!\n");
 
-    // print_header(); // to print first shell header
-
-    
-
+    print_header(); // to print first shell header
 
     //Switching to graphics mode
-    // set_mode_13h();
+    set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     //testing
@@ -139,44 +141,25 @@ void kernel_main(void) {
     vga_draw_init();
     serial_print("Backbuffer implimentation sucessfull!\n");
 
-    serial_print("\n");
-
     //set timer to 60 TPS
     setTPS(60);
 
     //enable mouse
     mouse_init();
-    
+    serial_print("Right before interrupt!\n");
+
     // Enable interrupts!
     enable_interrupts();
     serial_print("Interrupts Enabled!\n");
 
+    serial_print_number(36);
+    serial_print_number(364555678);
+
+
     //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
     disk_init();
 
-
-//The read write test
-    uint16_t test_buffer[256];
-    uint16_t test_buffer2[256];
-// Fill with test data
-for(int i = 0; i < 256; i++) {
-    test_buffer[i] = i;
-}
-
-// Write to sector 100
-write_sector(100, test_buffer);
-
-// Read back
-read_sector(100, test_buffer2);
-
-// Verify
-for(int i = 0; i < 256; i++) {
-    if(test_buffer[i] != test_buffer2[i]) {
-        serial_print("MISMATCH!\n");
-    }
-}
-
-serial_print("NICEE");
+    serial_print("NICEE\n");
 
     // Hang forever (interrupts will still work!)
     while (1) {

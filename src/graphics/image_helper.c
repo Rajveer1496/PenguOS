@@ -32,8 +32,6 @@ int image_hold =0;
 uint8_t * image_canvas_new(uint16_t width, uint16_t height){
     int required_pages = ((width * height)/4096) + 1;
    
-    vga_print_hex(15, 17, required_pages); //Debug
-    
     //Intiialize to blank
     uint8_t *ptr = (uint8_t *)alloc_continous_pages(required_pages);
 

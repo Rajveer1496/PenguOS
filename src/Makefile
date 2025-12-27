@@ -54,10 +54,10 @@ VPATH = memory:debug:graphics:drivers:file_system
 
 # Run in QEMU
 run: $(ISO)
-	qemu-system-i386 -cdrom $(ISO) -serial stdio \
+	qemu-system-x86_64 -enable-kvm -cdrom $(ISO) -serial stdio \
     -display sdl,grab-mod=rctrl -drive file=disk.img,format=raw
 
-	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
+	rm -rf $(OBJS) $(KERNEL_BIN) isodir
 
 # Clean build artifacts
 clean:

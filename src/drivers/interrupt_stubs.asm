@@ -19,8 +19,8 @@ interrupt_common:
     push fs
     push gs
     
-    ; Load kernel data segment (0x10)
-    mov ax, 0x10
+    ; Load kernel data segment (0x18) -> GRUB'S GDT
+    mov ax, 0x18
     mov ds, ax
     mov es, ax
     mov fs, ax

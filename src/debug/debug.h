@@ -3,6 +3,7 @@
 
 //serial.c
 void serial_print(const char* str);
+extern void serial_print_number(uint32_t number);
 
 //kernel.c
 void vga_print_hex(int x, int y, uint32_t value);

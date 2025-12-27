@@ -1,7 +1,5 @@
-Prerequisits: Grub tools, gcc, Qemu
+* Prerequisits: Grub tools, gcc, Qemu, make
 
-To run:
-cd src/
-make clean
-make
-make run
+To compile and run:
+* cd src/
+* make run
