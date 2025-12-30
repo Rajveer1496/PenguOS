@@ -19,8 +19,10 @@ struct image roxo; //TEMP
 
 void wait_untill_controller_ready();
 void wait_untill_dataPort_ready();
+void flush_dataport();
 
 void mouse_init(){
+    flush_dataport(); //clean data port before
 
     //First Enable mouse in PS/2 controller
     // Read configuration byte
@@ -87,6 +89,7 @@ int mouse_y=0;
 int packet_counter = 0;
 uint8_t packet[3];
 void mouse_handler(){
+
     // Check if data is actually available
     uint8_t status = inb(MOUSE_COMMAND_STATUS_PORT);
     if (!(status & 0x1)) {  // No data available
@@ -210,6 +213,24 @@ void wait_untill_dataPort_ready(){
     while(1){ 
         if(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1) break; //0th bit = 1 tells that data is ready to be read in Data port
     }
+}
+
+void flush_dataport(){
+    while(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1){ //flush 1
+        inb(DATA_PORT);
+    }
+    for(volatile int i=0;i<10000;i++);
+
+    while(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1){ //flush 2
+        inb(DATA_PORT);
+    }
+    for(volatile int i=0;i<10000;i++);
+
+    while(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1){ //flush 3
+        inb(DATA_PORT);
+    }
+
+    //garunteed exit
 }
 
 

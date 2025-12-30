@@ -48,20 +48,61 @@ void draw_Rectangle_hollow(int x,int y,int width,int height,uint8_t color){
 }
 
 void animation(){
+    serial_print("In Animation!\n");
     uint32_t last_frame = 0;
     int height = 50;
     int width = 50;
+    uint8_t color = 1;
+    int x = 10;
+    int y = 10;
     setTPS(120);
-    uint16_t FPS=60; //Animation is drawing "FPS" frames every second
+    uint16_t FPS=120; //Animation is drawing "FPS" frames every second
     if(FPS>current_tps){
         serial_print("FPS cannot go faster than TPS!\n");
         return;
     }
+    serial_print("BBB!\n");
     while(1){
+    // if(timer >= last_frame + (current_tps/FPS)){ 
+    //     vga_clear_backBuffer();
+    //     draw_Rectangle_solid(anim_cursor_x,anim_cursor_y,width,height,0x0D);
+    //     draw_Rectangle_hollow(anim_cursor_x,anim_cursor_y,width,height,0x0E);
+    //     vga_flipBuffer();
+    //     last_frame = timer;
+    // }
+
+    //temp
     if(timer >= last_frame + (current_tps/FPS)){ 
         vga_clear_backBuffer();
-        draw_Rectangle_solid(anim_cursor_x,anim_cursor_y,width,height,0x0D);
-        draw_Rectangle_hollow(anim_cursor_x,anim_cursor_y,width,height,0x0E);
+        draw_Rectangle_solid(x,y,height,width,color);
+        if(x<WIDTH && y < HEIGHT){
+            x++;
+            y++;
+        }else{
+            x=10;
+            y=10;
+
+            if(width < WIDTH && height<HEIGHT){
+                width++;
+                height++;
+
+            }else{
+                width = 40;
+                height = 20;
+                serial_print("Dimension reset\n");
+            }
+
+            if(color < 63){ //Only 0-64 colors are available in default 13h mode color pallet
+                color++;
+            }
+             else {
+                color=1;
+                serial_print("Color reset\n");
+            }
+        }
+
+        // if(FPS < 55) FPS +=5;
+
         vga_flipBuffer();
         last_frame = timer;
     } 

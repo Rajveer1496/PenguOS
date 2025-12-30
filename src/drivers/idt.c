@@ -205,7 +205,6 @@ void interrupt_handler(uint32_t int_no) {
     }
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
         keyboard_handler();
-        serial_print("KEY KEY KEY\n");
     }else if(int_no == 44){ // IRQ 12 = MOUSE
         mouse_handler();
     }else if(int_no == 46){ // IRQ 14 = DISK

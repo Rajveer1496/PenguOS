@@ -9,5 +9,6 @@ extern void pic_unmask(uint32_t irqNo);
 
 //TIMER
 extern void setTPS(uint16_t TPS);
+extern void wait(uint32_t miliseconds);
 
 #endif

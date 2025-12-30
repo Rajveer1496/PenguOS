@@ -51,6 +51,7 @@ extern void write_pixel_BackBuffer(int x, int y, uint8_t color);
 extern uint8_t * image_canvas_new(uint32_t width, uint32_t height);
 extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
 extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
+extern void animation();
 
 //Mouse
 extern void mouse_init();
@@ -91,8 +92,7 @@ void vga_clear() {
 static inline void enable_interrupts() {
     __asm__ volatile("sti");
 }
-
-// Add this helper function 
+ 
 void vga_print_hex(int x, int y, uint32_t value) { //for debug
     char hex_chars[] = "0123456789ABCDEF";
     for (int i = 7; i >= 0; i--) {
@@ -130,7 +130,7 @@ void kernel_main(void) {
     set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
-    //testing
+    // testing
     for(int i=0;i<WIDTH;i++){
         for(int j=0; j<HEIGHT;j++){
             write_pixel(i,j,(i+j)*i);
@@ -140,9 +140,6 @@ void kernel_main(void) {
     //Testing back buffer
     vga_draw_init();
     serial_print("Backbuffer implimentation sucessfull!\n");
-
-    //set timer to 60 TPS
-    setTPS(60);
 
     //enable mouse
     mouse_init();
@@ -160,6 +157,8 @@ void kernel_main(void) {
     disk_init();
 
     serial_print("NICEE\n");
+
+    // animation();
 
     // Hang forever (interrupts will still work!)
     while (1) {
