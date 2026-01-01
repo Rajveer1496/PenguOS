@@ -127,7 +127,7 @@ void kernel_main(void) {
     print_header(); // to print first shell header
 
     //Switching to graphics mode
-    set_mode_13h();
+    // set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     // testing

@@ -168,6 +168,9 @@ extern void pic_send_eoi(uint8_t irq);
 extern void vga_putchar(int x, int y, char c, unsigned char color); // for debug
 extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 
+//DEBUG
+int irqCounter =0;
+
 // C interrupt handler - called from assembly
 void interrupt_handler(uint32_t int_no) {
 
@@ -197,8 +200,7 @@ void interrupt_handler(uint32_t int_no) {
 
     if(int_no == 32){
         // serial_print("TIMER!\n");
-        if(timer < 0xFFFFFFFF) timer++;
-        else timer =0;
+        timer++;
         
         vga_print_hex(20, 1, timer);
         pic_send_eoi(0);
@@ -206,6 +208,8 @@ void interrupt_handler(uint32_t int_no) {
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
         keyboard_handler();
     }else if(int_no == 44){ // IRQ 12 = MOUSE
+        irqCounter++;
+        vga_print_hex(30,15,irqCounter);
         mouse_handler();
     }else if(int_no == 46){ // IRQ 14 = DISK
         disk_ready = 1;

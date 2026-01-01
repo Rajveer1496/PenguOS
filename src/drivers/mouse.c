@@ -52,7 +52,7 @@ void mouse_init(){
     wait_untill_controller_ready();
 
     set_default:
-    outb(DATA_PORT,0xF6); //set defaults
+    outb(DATA_PORT,0xF6); //set defaults //TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     wait_untill_dataPort_ready();
     if(inb(DATA_PORT) != 0xFA) goto set_default;
 
@@ -64,6 +64,8 @@ void mouse_init(){
     outb(DATA_PORT,0xF4); //tell mouse to start sending packets
     wait_untill_dataPort_ready();
     if(inb(DATA_PORT) != 0xFA) goto start_packet;
+
+    flush_dataport(); //clean dataport
 
     serial_print("Mouse is ON!\n");
 
@@ -102,8 +104,15 @@ void mouse_handler(){
         return;
     }
 
-    wait_untill_dataPort_ready();
+    // wait_untill_dataPort_ready(); //hmhmmhmhmh
     packet[packet_counter] = inb(0x60);
+    //DEBUG:
+    if(packet_counter == 0){
+        if(!(packet[packet_counter] & (0x1<<3))){
+            printToscreen("Packets Out of Sync\n",0x0E);
+        }
+    }
+
     pic_send_eoi(12); //We are done with interrupt (CPU dont accepts new interrupts untill one interrupt is not handled (untill iret is not called))
     if(packet_counter==2) goto process_packets;
     packet_counter++;
@@ -112,6 +121,16 @@ void mouse_handler(){
 //---PROCESS---
     process_packets:
     packet_counter=0;
+
+    //print the KEY STATUS packet[0]
+    if(packet[0] != 0x8){
+        vga_print_hex(15,19,packet[0]);
+    }
+    vga_print_hex(15,20,packet[0]);
+
+    //Mouse movement delta values
+    vga_print_hex(15,22,packet[1]);
+    vga_print_hex(15,23,packet[2]);
 
     //---KEY STATUS---
     //Left key
@@ -229,6 +248,7 @@ void flush_dataport(){
     while(inb(MOUSE_COMMAND_STATUS_PORT) & 0x1){ //flush 3
         inb(DATA_PORT);
     }
+    for(volatile int i=0; i<100000; i++);
 
     //garunteed exit
 }

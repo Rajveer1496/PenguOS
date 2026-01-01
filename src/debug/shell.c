@@ -9,6 +9,8 @@ int strCompare(const char *str1,const char *str2);
 void printToscreen(const char *str,unsigned char color);
 void JustPrint(); //for debug
 
+extern void set_mode_13h();
+
 extern int cursor_x;
 extern int cursor_y;
 
@@ -28,6 +30,10 @@ void shellExecute(const char *str){
         //do nothing if just pressed enter
     }else if(strCompare(str,"devdi")){
         printToscreen(";)",0x0E);
+    }
+    else if(strCompare(str,"gui")){
+        printToscreen("Starting 13h mode!",0x0E);
+        set_mode_13h();
     }
     else printToscreen("Buddy what are you trying to say? use 'help' for available commands",0x0E);
 }
@@ -51,6 +57,12 @@ void shellExecute(const char *str){
     }
 
     void printToscreen(const char *str,unsigned char color){
+        if(cursor_y>=24){
+            cursor_x = 0;
+            cursor_y = 0;
+            vga_print(cursor_x, cursor_y, str, color);
+            return;
+        }
         cursor_x = 0;
         cursor_y++;
         vga_print(cursor_x, cursor_y, str, color);
