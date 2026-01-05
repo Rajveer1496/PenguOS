@@ -22,45 +22,66 @@ void wait_untill_dataPort_ready();
 void flush_dataport();
 
 void mouse_init(){
-    flush_dataport(); //clean data port before
-
-    //First Enable mouse in PS/2 controller
-    // Read configuration byte
-    outb(0x64, 0x20);  // Command: Read configuration
-    wait_untill_dataPort_ready();
-    uint8_t config = inb(0x60);
-
-    // Enable mouse interrupt (set bit 1)
-    config |= 0x02;
-
-    // Write configuration back
-    outb(0x64, 0x60);  // Command: Write configuration
-    wait_untill_controller_ready();
-    outb(0x60, config);
-
     pic_unmask(1);   // Unmask Keyboard
     pic_unmask(2);  // Unmask the cascade line
 
     //Then unmask the IRQ 12 (Mouse)
     pic_unmask(12); //But IRQ 12 is unmasked by default by BIOS/GRUB
 
-    //Now Enable mouse for CPU
-    outb(MOUSE_COMMAND_STATUS_PORT,0xA8); //Enable Mouse
-    wait_untill_controller_ready();
+    flush_dataport(); //clean data port before
 
+    //First Enable mouse in PS/2 controller
+    // Read configuration byte
+    wait_untill_controller_ready();
+    outb(0x64, 0x20);  // Command: Read configuration
+    wait_untill_dataPort_ready();
+    uint8_t config = inb(0x60);
+
+    // Enable mouse interrupt (set bit 1)
+    config |= 0x02; //Enable IRQ12
+    config &= ~(1<<5); //Disable Mouse clock
+
+    // Write configuration back
+    wait_untill_controller_ready();
+    outb(0x64, 0x60);  // Command: Write configuration
+    wait_untill_controller_ready();
+    outb(0x60, config); //This might generate a 0XFAACK byte from keyboard
+    flush_dataport();
+
+    //Now Enable mouse for CPU
+    wait_untill_controller_ready();
+    outb(MOUSE_COMMAND_STATUS_PORT,0xA8); //Enable Mouse (ENABLE Auxilary Device command)
+    // above command generates an ACK response from keyboard
+    flush_dataport();
+
+    set_default:
+    wait_untill_controller_ready();
     outb(MOUSE_COMMAND_STATUS_PORT,0xD4); //next byte is for mouse
     wait_untill_controller_ready();
 
-    set_default:
-    outb(DATA_PORT,0xF6); //set defaults //TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+    outb(DATA_PORT,0xFF); //Reset command //TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+    /*
+    After reset mouse goes in this state
+    packets disabled
+    emulate 3 button mouse (buttons 4, 5, and scroll wheels disabled)
+    3 byte packets
+    4 pixel/mm resolution
+    100 packets per second sample rate
+    */
     wait_untill_dataPort_ready();
-    if(inb(DATA_PORT) != 0xFA) goto set_default;
+    if(inb(DATA_PORT) != 0xFA) goto set_default; //the ACK 0xFA means, hardware: i have recived your command. it will take  some time to process
+    wait_untill_dataPort_ready();
+    while(1){ //After reset its send several other bytes and always sends 0XAA
+        wait_untill_dataPort_ready();
+        if(inb(DATA_PORT) == 0xAA) break;
+    }
+    flush_dataport();
 
+    
+    start_packet:
     wait_untill_controller_ready();
     outb(MOUSE_COMMAND_STATUS_PORT,0xD4); //Tell chip that next byte is for mouse
     wait_untill_controller_ready();
-    
-    start_packet:
     outb(DATA_PORT,0xF4); //tell mouse to start sending packets
     wait_untill_dataPort_ready();
     if(inb(DATA_PORT) != 0xFA) goto start_packet;
