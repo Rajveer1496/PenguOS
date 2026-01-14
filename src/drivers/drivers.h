@@ -7,6 +7,9 @@ extern uint16_t inw(uint16_t port);
 extern void outw(uint16_t port, uint16_t value);
 extern void pic_unmask(uint32_t irqNo);
 
+extern uint32_t readESP(void);
+extern void writeESP(uint32_t espVal);
+
 //TIMER
 extern void setTPS(uint16_t TPS);
 extern void wait(uint32_t miliseconds);

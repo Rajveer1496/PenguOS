@@ -5,6 +5,8 @@
 #include "debug.h"
 #include "files.h"
 #include "drivers.h"
+#include "threading.h"
+#include "graphics.h"
 
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
@@ -24,6 +26,7 @@ extern int cursor_x;
 extern int cursor_y;
 
 extern uint32_t timer;
+extern uint16_t current_tps;
 
 //Disable APIC
 extern void disable_apic();
@@ -48,7 +51,6 @@ extern void vga_draw_init();
 extern void vga_flipBuffer();
 extern void write_pixel_BackBuffer(int x, int y, uint8_t color);
 //Image Helper
-extern uint8_t * image_canvas_new(uint32_t width, uint32_t height);
 extern void image_paste_backBuffer(int place_x,int place_y,uint16_t *ImgPtr);
 extern void image_load_const(void* sourcePtr, uint16_t *ImgPtr);
 extern void animation();
@@ -97,6 +99,82 @@ void vga_print_hex(int x, int y, uint32_t value) { //for debug
     char hex_chars[] = "0123456789ABCDEF";
     for (int i = 7; i >= 0; i--) {
         vga_putchar(x + (7 - i), y, hex_chars[(value >> (i * 4)) & 0xF], 0x0F);
+    }
+}
+
+void testProcess1(){
+    uint32_t last_frame = 0;
+    int height = 50;
+    int width = 50;
+    uint8_t color = 1;
+    int x = 10;
+    int y = 10;
+    setTPS(120);
+    uint16_t FPS=120; //Animation is drawing "FPS" frames every second
+     while(1){
+
+    //temp
+    if(timer >= last_frame + (current_tps/FPS)){ 
+        vga_clear_backBuffer();
+        draw_Rectangle_solid(x,y,height,width,color);
+        if(x<WIDTH && y < HEIGHT){
+            x+=2;
+            y+=2;
+        }else{
+            x=10;
+            y=10;
+
+            if(width < WIDTH && height<HEIGHT){
+                width++;
+                height++;
+
+            }else{
+                width = 40;
+                height = 20;
+                serial_print("Dimension reset\n");
+            }
+        }
+        vga_flipBuffer();
+        last_frame = timer;
+    } 
+    }
+}
+
+void testProcess2(){
+    uint32_t last_frame = 0;
+    int height = 50;
+    int width = 50;
+    uint8_t color = 2;
+    int x = 10;
+    int y = 10;
+    setTPS(120);
+    uint16_t FPS=120; //Animation is drawing "FPS" frames every second
+     while(1){
+
+    //temp
+    if(timer >= last_frame + (current_tps/FPS)){ 
+        vga_clear_backBuffer();
+        draw_Rectangle_solid(x,y,height,width,color);
+        if(x<WIDTH && y < HEIGHT){
+            x++;
+            y++;
+        }else{
+            x=10;
+            y=10;
+
+            if(width < WIDTH && height<HEIGHT){
+                width++;
+                height++;
+
+            }else{
+                width = 40;
+                height = 20;
+                serial_print("Dimension reset\n");
+            }
+        }
+        vga_flipBuffer();
+        last_frame = timer;
+    } 
     }
 }
 
@@ -158,7 +236,17 @@ void kernel_main(void) {
 
     serial_print("NICEE\n");
 
+    setTPS(120);
+
     // animation();
+
+    // Threading testing
+
+    void *fn1 = &testProcess1;
+    void *fn2 = &testProcess2;
+
+    create_thread(fn1);
+    create_thread(fn2);
 
     // Hang forever (interrupts will still work!)
     while (1) {

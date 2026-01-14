@@ -38,3 +38,15 @@ inw:
     mov dx, [esp + 4]    ; port number (16-bit)
     in ax, dx            ; Read from port DX into AX
     ret                  ; Return value is in AX
+
+global readESP
+readESP:
+    mov eax,esp
+    ret
+
+global writeESP
+writeESP:
+    ;first parameter
+    mov eax, [esp + 4]
+    mov esp, eax
+    ret

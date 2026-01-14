@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "files.h"
 #include "drivers.h"
+#include "threading.h"
 
 uint32_t timer = 0;
 
@@ -172,7 +173,7 @@ extern void vga_print_hex(int x, int y, uint32_t value); //for debug
 int irqCounter =0;
 
 // C interrupt handler - called from assembly
-void interrupt_handler(uint32_t int_no) {
+uint32_t interrupt_handler(uint32_t int_no,uint32_t esp) {
 
     if(int_no == 13) serial_print("->GPF\n");
 
@@ -201,9 +202,13 @@ void interrupt_handler(uint32_t int_no) {
     if(int_no == 32){
         // serial_print("TIMER!\n");
         timer++;
-        
+        //SWTICH THREAD
+        uint32_t newESP = switchThread(esp);
+
         vga_print_hex(20, 1, timer);
         pic_send_eoi(0);
+
+        return newESP;
     }
     else if(int_no == 33) {  // IRQ 1 = Keyboard (interrupt 33)
         keyboard_handler();
@@ -221,6 +226,7 @@ void interrupt_handler(uint32_t int_no) {
     }
     // For CPU exceptions (0-31), do nothing for now
 
+    return 1; //MUST BE 1 FOR ALL EXCEPTION OTHER THAN TIMER (Thread Switch)
 }
 
 /* WHAT HAPPNES WHEN I PRESS A KEY

@@ -36,7 +36,8 @@ void wait(uint32_t miliseconds){ ///IMPROVE IT SO IT CAN HANDLE LOW TPS
     uint32_t last_frame = timer;
 
     if(current_tps < (1000/miliseconds)){
-        serial_print("Cant wait for that low!, too low TPS! (waiting Default 0.5 sec)\n");
+        serial_print("Cant wait for that low!, too low TPS!\n");
+        //ADD DEFAULT WAIT OF 0.5 SEC
         return;
     }
 

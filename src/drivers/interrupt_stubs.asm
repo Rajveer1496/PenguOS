@@ -11,8 +11,10 @@ extern JustPrint ;DEBUG
 ; This saves all registers, calls C handler, then restores everything
 interrupt_common:
     ; Save all registers
-    pusha                  ; Push EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
-    
+    pushad                  ; Push EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
+;   PUSHA -> saves 16 bit registers
+;   PUSHAD -> saves 32 bit registers
+
     ; Save segment registers
     push ds
     push es
@@ -26,16 +28,24 @@ interrupt_common:
     mov fs, ax
     mov gs, ax
 
+    mov ebx, esp ;The ORIGNAL ESP after all pushes
 
     ; Push interrupt number as parameter to C function
     mov eax, [esp + 48]  ; Get interrupt number (after all pushes)
-    push eax
+
+    push ebx    ;Passing esp as second parameter
+    push eax    ;interrupt number as first parameter
     
     ; Call C interrupt handler
     ; Stack now contains all saved registers
     call interrupt_handler
 
-    add esp, 4  ; Clean up parameter
+    add esp, 8  ; Clean up parameter
+    cmp eax,1
+    je skipLoadingESP
+    mov esp, eax ;New ESP value from another thread
+
+    skipLoadingESP:
     
     ; Restore segment registers
     pop gs
@@ -44,7 +54,7 @@ interrupt_common:
     pop ds
     
     ; Restore all registers
-    popa
+    popad
     
     ; Clean up the interrupt number and error code we pushed
     add esp, 8 ;(Moved the stack pointer to the return address)

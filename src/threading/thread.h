@@ -3,6 +3,6 @@
 
 struct thread{
     uint32_t esp;
-}
+};
 
-#endif THREAD_H
+#endif
