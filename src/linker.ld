@@ -11,9 +11,10 @@ SECTIONS
 
     /* .text section - executable code */
     .text : ALIGN(4096)
-    {
-        *(.multiboot)    /* Multiboot header MUST come first! */
-        *(.text)         /* All code sections from all object files */
+    {   
+        kernel_entry.o(.text)
+        *(.text)         /* _start will be here first */
+        /* All code sections from all object files */
     }
 
     /* .rodata section - read-only data (strings, constants) */

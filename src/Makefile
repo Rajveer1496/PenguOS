@@ -7,7 +7,7 @@ LD = ld
 
 # Flags for each tool
 ASMFLAGS = -f elf32
-CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -fno-pie -O0 -Wall -Wextra
+CFLAGS = -g -m32 -ffreestanding -fno-stack-protector -nostdlib -fno-pie -O0 -Wall -Wextra
 LDFLAGS = -m elf_i386 -T linker.ld
 
 #FOR INCLUDE FLAG
@@ -16,33 +16,44 @@ INCLUDES = $(addprefix -I,$(SUBDIRS))
 
 # Output files
 KERNEL_BIN = kernel.bin
-ISO = myos.iso
+BOOTLOADER_IMG = bootloader.img
+BOOT_1_BIN = boot/boot_1.bin
+BOOT_2_BIN = boot/boot_2.bin
+BOOT_O = boot.o
 
 #All c and asm files
 C_SOURCES = $(shell find . -name '*.c')
-ASM_SOURCES = $(shell find . -name '*.asm')
+ASM_SOURCES = $(shell find . -name '*.asm' ! -path './boot/*') # Dont link the bootloader, it has to be seperate
 
 #changing .c from c files to .o (OBJECT FILES)
 OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) 
 
 # Default target - build everything
-all: $(ISO)
+all: $(BOOTLOADER_IMG)
 
 # Build the ISO image (bootable CD)
-$(ISO): $(KERNEL_BIN)
-	mkdir -p isodir/boot/grub
-	cp $(KERNEL_BIN) isodir/boot/
-	echo 'menuentry "PenguOS" {' > isodir/boot/grub/grub.cfg
-	echo '    multiboot /boot/$(KERNEL_BIN)' >> isodir/boot/grub/grub.cfg
-	echo '}' >> isodir/boot/grub/grub.cfg
-	grub2-mkrescue -o $(ISO) isodir
+# Combine into bootable image
+$(BOOTLOADER_IMG): $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN)
+	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN) > $@
 
-# Link object files into kernel binary
-$(KERNEL_BIN): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^
+
+# Link to ELF first (keeps symbols for debugging)
+kernel.elf: $(OBJS)
+	$(LD) $(LDFLAGS) -o $@ kernel_entry.o $(filter-out kernel_entry.o, $^)
+
+# Extract flat binary from ELF (for bootloader)
+$(KERNEL_BIN): kernel.elf
+	objcopy -O binary kernel.elf $(KERNEL_BIN)
 
 #VPATH (tells make to look where for source files)
 VPATH = memory:debug:graphics:drivers:file_system
+
+# Build bootloader binaries
+$(BOOT_1_BIN): boot/boot_1.asm
+	$(ASM) -f bin $< -o $@
+
+$(BOOT_2_BIN): boot/boot_2.asm
+	$(ASM) -f bin $< -o $@
 
 #compile all c and asm files
 %.o: %.c
@@ -53,15 +64,15 @@ VPATH = memory:debug:graphics:drivers:file_system
 
 
 # Run in QEMU
-run: $(ISO)
-	qemu-system-x86_64 -enable-kvm -cdrom $(ISO) -serial stdio \
-    -display sdl,grab-mod=rctrl -drive file=disk.img,format=raw
+run: $(BOOTLOADER_IMG)
+	qemu-system-i386 -enable-kvm -drive file=bootloader.img,format=raw -drive file=disk.img,format=raw -serial stdio \
+    -display sdl,grab-mod=rctrl
 
-	rm -rf $(OBJS) $(KERNEL_BIN) isodir
+	#rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O)
 
 # Clean build artifacts
 clean:
-	rm -rf $(OBJS) $(KERNEL_BIN) $(ISO) isodir
+	rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O) $(BOOTLOADER_IMG)
 
 #create disk
 createdisk:
