@@ -52,8 +52,9 @@ $(PADDED_KERNEL_SIZE_BIN): $(KERNEL_SIZE_BIN) $(PADDING_FILE_BIN)
 $(PADDING_FILE_BIN):
 	dd if=/dev/zero of=$(PADDING_FILE_BIN) bs=508 count=1
 
-$(KERNEL_SIZE_BIN): $(KERNEL_BIN)  #The kernel size in 4 bytes 
-	printf '%08x\n' $(SIZE) | xxd -r -p > $(KERNEL_SIZE_BIN)
+# storing it in little endian (using xxd with byte reversal)
+$(KERNEL_SIZE_BIN): $(KERNEL_BIN)
+	printf '%08x' $(SIZE) | sed 's/\(..\)\(..\)\(..\)\(..\)/\4\3\2\1/' | xxd -r -p > $(KERNEL_SIZE_BIN)
 
 # Link to ELF first (keeps symbols for debugging)
 kernel.elf: $(OBJS)

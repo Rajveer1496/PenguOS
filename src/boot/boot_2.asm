@@ -97,14 +97,11 @@ protected_mode:
     ;[EDI] has data
 
     ;get no of sectors
-    ; Divide 100 by 5
-    mov eax, [0xFFE00]        ; get the number of sectors (SIZE / 512 bytes)
-    call print_hex_simple
+    mov eax, [0xFFE00]        ; get the Size of kernel
 
     cmp eax, 0x0
-    
     xor edx, edx        ; Clear EDX (high 32 bits = 0)
-    mov ebx, 512          ; Divisor
+    mov ebx, 512        ; Divisor
     div ebx             ; EAX has answer, edx has remainder
     cmp edx,0
     je no_roofValue
@@ -224,11 +221,8 @@ ata_read: ;LBA mode
     popfd
     ret
     
-
-    ; Function: print_hex_simple
 ; Input: EAX = value to print
 ; Destroys: EBX, ECX, EDI
-
 print_hex_simple:
     mov edi, 0xB8000        ; VGA buffer start
     mov ecx, 8              ; 8 hex digits
