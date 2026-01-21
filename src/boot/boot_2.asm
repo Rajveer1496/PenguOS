@@ -81,13 +81,45 @@ protected_mode:
 ; _____________NOTE______________________
 ; ONLY READ THE NUMBER OF SECTORS THAT ARE EQUAL TO YOUR DISK SIZE (READING MORE THAN THAT WILL CAUSE ATA TO HANG FOREVER)
 
+
+;---GET SIZE OF KERNEL--- (Number of sectors to load)
+;FFE00
+    mov edx, 0xFFE00 ;Put everything at 1MB and so on
+    mov edi, edx
+    mov ebx, 0x9 ;read from sector 9
+
+    push edi ;preserving edi so it would not get changed by accident
+    mov eax, 0x1  ; Read only one sector
+    push eax
+    push ebx ;sector to start from
+    call ata_read
+    add esp,12 ;clean parameter (sector no)
+    ;[EDI] has data
+
+    ;get no of sectors
+    ; Divide 100 by 5
+    mov eax, [0xFFE00]        ; get the number of sectors (SIZE / 512 bytes)
+    call print_hex_simple
+
+    cmp eax, 0x0
+    
+    xor edx, edx        ; Clear EDX (high 32 bits = 0)
+    mov ebx, 512          ; Divisor
+    div ebx             ; EAX has answer, edx has remainder
+    cmp edx,0
+    je no_roofValue
+    inc eax ;Roof value of division if have a remainder
+
+no_roofValue:
+
+;----LOAD THE KERNEL----
 ; Load kernel at 1 MB
 ; LBA = no. of sector to start reading from
 ; CL = number of sectors to read ()
     mov edx, 0x100000 ;Put everything at 1MB and so on
     mov edi, edx
-    mov ecx, 41 ; Read 41 sectors (HARDCODED FOR CURRENT KERNEL SIZE)
-    mov ebx, 0x9 ;read from sector 9
+    mov ecx, eax ; No of Sectors (calculated early)
+    mov ebx, 0xA ;read from sector 10
 
 ;push no of sectors
 ;push sector to start from
@@ -190,6 +222,36 @@ ata_read: ;LBA mode
     pop ebx
     pop eax
     popfd
+    ret
+    
+
+    ; Function: print_hex_simple
+; Input: EAX = value to print
+; Destroys: EBX, ECX, EDI
+
+print_hex_simple:
+    mov edi, 0xB8000        ; VGA buffer start
+    mov ecx, 8              ; 8 hex digits
+    
+.loop:
+    rol eax, 4              ; Get next nibble
+    mov ebx, eax
+    and ebx, 0x0F           ; Isolate 4 bits
+    
+    ; Convert to hex char
+    cmp ebx, 9
+    jg .letter
+    add ebx, '0'            ; 0-9
+    jmp .write
+.letter:
+    add ebx, 'A' - 10       ; A-F
+    
+.write:
+    mov byte [edi], bl      ; Write character
+    mov byte [edi+1], 0x0F  ; White on black
+    add edi, 2
+    
+    loop .loop
     ret
     
 ; Pad to 4096 bytes (1-8 sectors)

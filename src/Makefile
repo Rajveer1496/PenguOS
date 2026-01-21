@@ -21,6 +21,14 @@ BOOT_1_BIN = boot/boot_1.bin
 BOOT_2_BIN = boot/boot_2.bin
 BOOT_O = boot.o
 
+#To create a sector (512 bytes) of kernel size
+FILE=kernel.bin
+SIZE=$(shell stat -L -c %s $(FILE)) #calculating kernel File size
+
+PADDED_KERNEL_SIZE_BIN = padded_kernel_size.bin
+PADDING_FILE_BIN = paddingFile.bin
+KERNEL_SIZE_BIN = kernel_size.bin
+
 #All c and asm files
 C_SOURCES = $(shell find . -name '*.c')
 ASM_SOURCES = $(shell find . -name '*.asm' ! -path './boot/*') # Dont link the bootloader, it has to be seperate
@@ -33,9 +41,19 @@ all: $(BOOTLOADER_IMG)
 
 # Build the ISO image (bootable CD)
 # Combine into bootable image
-$(BOOTLOADER_IMG): $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN)
-	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN) > $@
+$(BOOTLOADER_IMG): $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN) $(PADDED_KERNEL_SIZE_BIN)
+	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(PADDED_KERNEL_SIZE_BIN) $(KERNEL_BIN) > $@
 
+#create padded kernel size sector
+
+$(PADDED_KERNEL_SIZE_BIN): $(KERNEL_SIZE_BIN) $(PADDING_FILE_BIN)
+	cat $(KERNEL_SIZE_BIN) $(PADDING_FILE_BIN) > $(PADDED_KERNEL_SIZE_BIN)
+
+$(PADDING_FILE_BIN):
+	dd if=/dev/zero of=$(PADDING_FILE_BIN) bs=508 count=1
+
+$(KERNEL_SIZE_BIN): $(KERNEL_BIN)  #The kernel size in 4 bytes 
+	printf '%08x\n' $(SIZE) | xxd -r -p > $(KERNEL_SIZE_BIN)
 
 # Link to ELF first (keeps symbols for debugging)
 kernel.elf: $(OBJS)
@@ -72,11 +90,14 @@ run: $(BOOTLOADER_IMG)
 
 # Clean build artifacts
 clean:
-	rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O) $(BOOTLOADER_IMG)
+	rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O) $(BOOTLOADER_IMG) $(KERNEL_SIZE_BIN) $(PADDED_KERNEL_SIZE_BIN) $(PADDING_FILE_BIN) kernel.elf
 
 #create disk
 createdisk:
 	qemu-img create -f raw disk.img 1G
+
+check_size:
+	@echo "Size of $(FILE) is $(SIZE) bytes"
 
 # Phony targets (not actual files)
 .PHONY: all clean run
