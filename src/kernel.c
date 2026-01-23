@@ -8,6 +8,10 @@
 #include "threading.h"
 #include "graphics.h"
 
+void break_ppp(){ //debug
+    return;
+}
+
 // VGA text mode buffer address
 #define VGA_MEMORY 0xB8000
 #define VGA_WIDTH 80
@@ -181,19 +185,6 @@ void testProcess2(){
 // This is called by kernel_entry.asm!
 void kernel_main(void) {
 
-    
-
-    // justPrintoo();
-
-    // First thing - prove we're here!
-    // unsigned short *vga = (unsigned short *)0xB8000;
-    // vga[10] = 0x0F00 | 'K';
-    // vga[11] = 0x0F00 | 'E';
-    // vga[12] = 0x0F00 | 'R';
-    // vga[13] = 0x0F00 | 'N';
-
-    // return;
-
 
     // // Clear screen
     vga_clear();
@@ -238,30 +229,32 @@ void kernel_main(void) {
     mouse_init();
     serial_print("Right before interrupt!\n");
 
-    // // Enable interrupts!
-    // enable_interrupts();
-    // serial_print("Interrupts Enabled!\n");
+    break_ppp();
 
-    // serial_print_number(36);
-    // serial_print_number(364555678);
+    // Enable interrupts!
+    enable_interrupts();
+    serial_print("Interrupts Enabled!\n");
+
+    serial_print_number(36);
+    serial_print_number(364555678);
 
 
-    // //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
-    // disk_init();
+    //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
+    disk_init();
 
-    // serial_print("NICEE\n");
+    serial_print("NICEE\n");
 
-    // setTPS(120);
+    setTPS(120);
 
-    // // animation();
+    // animation();
 
-    // // Threading testing
+    // Threading testing
 
-    // void *fn1 = &testProcess1;
-    // void *fn2 = &testProcess2;
+    void *fn1 = &testProcess1;
+    void *fn2 = &testProcess2;
 
-    // create_thread(fn1);
-    // create_thread(fn2);
+    create_thread(fn1);
+    create_thread(fn2);
 
     // Hang forever (interrupts will still work!)
     while (1) {

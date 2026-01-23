@@ -23,7 +23,7 @@ struct thread* create_thread(void (* function_pointer)){
     *stack_ptr = 0x0202; //EFLAGS, bit 9 set
 
     stack_ptr--;
-    *stack_ptr = 0x10; //CS (kernel code segment)
+    *stack_ptr = 0x8; //CS (kernel code segment)
 
     stack_ptr--;
     *stack_ptr = (uint32_t)function_pointer; // EIP
@@ -60,16 +60,16 @@ struct thread* create_thread(void (* function_pointer)){
     //SAVING SEGMENT REGISTERS
 
     stack_ptr--;
-    *stack_ptr = 0x18; //ds (0x18 - Kernel Data Segment)
+    *stack_ptr = 0x10; //ds (0x10 - Kernel Data Segment)
     
     stack_ptr--;
-    *stack_ptr = 0x18; //es
+    *stack_ptr = 0x10; //es
 
     stack_ptr--;
-    *stack_ptr = 0x18; //fs
+    *stack_ptr = 0x10; //fs
 
     stack_ptr--;
-    *stack_ptr = 0x18; //gs
+    *stack_ptr = 0x10; //gs
 
     // SAVING INTERRUPT NUMBER
 

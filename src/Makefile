@@ -87,7 +87,7 @@ run: $(BOOTLOADER_IMG)
 	qemu-system-i386 -enable-kvm -drive file=bootloader.img,format=raw -drive file=disk.img,format=raw -serial stdio \
     -display sdl,grab-mod=rctrl
 
-	#rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O)
+	rm -rf $(OBJS) $(KERNEL_BIN) $(BOOT_1_BIN) $(BOOT_2_BIN) $(BOOT_O) $(BOOTLOADER_IMG) $(KERNEL_SIZE_BIN) $(PADDED_KERNEL_SIZE_BIN) $(PADDING_FILE_BIN) kernel.elf
 
 # Clean build artifacts
 clean:
