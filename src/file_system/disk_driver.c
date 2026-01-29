@@ -29,7 +29,9 @@ int read_sector(uint32_t sectorNO, uint16_t * buffer){
     outb(LBA_2,(sectorNO >> 8) & 0xFF);
     outb(LBA_3,(sectorNO >> 16) & 0xFF);
 
-    uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xE << 4);
+    // uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xE << 4); // old
+    // uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xA0); //master drive
+    uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xB0); //slave drive
 
     outb(DRIVE_HEAD_BYTE,headByte); // last 4 bits of LBA and FLAGS
 
@@ -65,7 +67,9 @@ int write_sector(uint32_t sectorNO, uint16_t * buffer){
     outb(LBA_2,(sectorNO >> 8) & 0xFF);
     outb(LBA_3,(sectorNO >> 16) & 0xFF);
 
-    uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xE << 4);
+    // uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xE << 4); // old
+    // uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xA0); //master drive
+    uint8_t headByte = ((sectorNO >> 24) & 0xF) | (0xB0); //slave drive
 
     outb(DRIVE_HEAD_BYTE,headByte); // last 4 bits of LBA and FLAGS
 
@@ -111,7 +115,9 @@ int disk_init(){
 
     while(inb(STATUS_COMMAND_PORT) & 0x80); //wait while disk is busy
 
-    uint8_t headByte = (0xE << 4);
+    // uint8_t headByte = (0xE << 4); //old
+    // uint8_t headByte = 0xA0; //select master drive
+    uint8_t headByte = 0xB0; //select slave drive
     outb(DRIVE_HEAD_BYTE,headByte); // FLAGS
 
     uint8_t status = inb(STATUS_COMMAND_PORT);
