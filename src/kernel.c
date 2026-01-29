@@ -211,7 +211,7 @@ void kernel_main(void) {
     print_header(); // to print first shell header
 
     //Switching to graphics mode
-    set_mode_13h();
+    // set_mode_13h();
     serial_print("Graphics Mode Enabled!\n");
 
     // testing
@@ -250,12 +250,52 @@ void kernel_main(void) {
 
     // Threading testing
 
-    void *fn1 = &testProcess1;
-    void *fn2 = &testProcess2;
+    // void *fn1 = &testProcess1;
+    // void *fn2 = &testProcess2;
 
-    create_thread(fn1);
-    create_thread(fn2);
+    // create_thread(fn1);
+    // create_thread(fn2);
 
+
+    //The read write test
+    uint16_t test_buffer[256];
+    uint16_t test_buffer2[256];
+    // Fill with test data
+    for(int i = 0; i < 256; i++) {
+        test_buffer[i] = i;
+    }
+
+    // Write to sector 100
+    write_sector(100, test_buffer);
+
+    // Read back
+    read_sector(100, test_buffer2);
+
+    // Verify
+    for(int i = 0; i < 256; i++) {
+        if(test_buffer[i] != test_buffer2[i]) {
+            serial_print("MISMATCH!\n");
+        }
+    }
+
+    //File system
+    initializeDriveBitmap(); //File system Initialization
+
+    // Check file system Bitmap initialisation
+    uint16_t test_buffer3[256];
+    for(int i=1;i<1024;i++){
+        read_sector(i,test_buffer3);
+        for(int j=0;j<256;j++){
+            if(test_buffer3[j] != 0){
+                serial_print("Bitmap Not initialized correctly!\n");
+                serial_print("At sector: ");
+                serial_print_number(i);
+            }
+        }
+    }
+
+
+    serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)
     while (1) {
         __asm__ volatile("hlt");  // Halt until next interrupt

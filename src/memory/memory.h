@@ -1,6 +1,10 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+//pmm.c
+extern void * alloc_page();
+extern void free_page(void *address);
+
 //paging.c
 void* alloc_continous_pages(uint32_t count);
 void free_continous_pages(void *address,uint32_t count);
