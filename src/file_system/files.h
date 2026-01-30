@@ -12,6 +12,7 @@ extern int write_sector(uint32_t sectorNO, uint16_t * buffer);
 extern void initializeDriveBitmap();
 extern int set_sector_inUse(uint32_t sectorNO);
 extern int check_sector_usage(uint32_t sectorNO);
+extern int set_sector_free(uint32_t sectorNO);
 
 
 #endif

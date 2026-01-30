@@ -27,8 +27,9 @@ void initializeDriveBitmap(){
     serial_print("File system initialization complete!\n");
     return;
 }
+
+
 int set_sector_inUse(uint32_t sectorNO){
-    // TODO
     uint16_t* buffer = (uint16_t*) alloc_page();
 
     uint32_t readSector = (sectorNO / 4096) + 1;
@@ -43,19 +44,36 @@ int set_sector_inUse(uint32_t sectorNO){
 
     uint32_t * buffer_32 = (uint32_t *) buffer;
 
-    buffer_32[readInt] = (buffer_32[readInt]) || (1<<(32 - exactBit));
+    buffer_32[readInt] = (buffer_32[readInt]) | (1<<(32 - exactBit));
 
     write_sector(readSector, buffer);
 
     return 0;
 }
 
-void set_sector_free(uint32_t sectorNO){
-    // TODO
+int set_sector_free(uint32_t sectorNO){
+    uint16_t* buffer = (uint16_t*) alloc_page();
+
+    uint32_t readSector = (sectorNO / 4096) + 1;
+    uint32_t remainingBits = sectorNO - (readSector-1)*4096;
+    uint32_t readInt = remainingBits / 32;
+    uint32_t exactBit = remainingBits % 32;
+
+    if(read_sector(readSector, buffer) != 0){
+        serial_print("Error: in set_sector_inUse(), Can't read disk!\n");
+        return -1;
+    }
+
+    uint32_t * buffer_32 = (uint32_t *) buffer;
+
+    buffer_32[readInt] = (buffer_32[readInt]) & ~(1<<(32 - exactBit));
+
+    write_sector(readSector, buffer);
+
+    return 0;
 }
 
 int check_sector_usage(uint32_t sectorNO){
-    // TODO
     uint16_t* buffer = (uint16_t*) alloc_page();
 
     uint32_t readSector = (sectorNO / 4096) + 1;;
@@ -70,14 +88,10 @@ int check_sector_usage(uint32_t sectorNO){
 
     uint32_t * buffer_32 = (uint32_t *) buffer;
 
-    buffer_32[readInt] = (buffer_32[readInt]) || (1<<(32 - exactBit));
-
-    if((buffer_32[readInt]) && (1<<(32 - exactBit))){ // true if not free
-        serial_print("SECTOR NOT FREE\n");
+    if(((buffer_32[readInt]) & (1<<(32 - exactBit)))){ // true if not free
         return 1; // not free
     }
 
-    serial_print("SECTOR FREE\n");
     return 0; // is free
 }
 

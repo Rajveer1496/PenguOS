@@ -294,6 +294,28 @@ void kernel_main(void) {
         }
     }
 
+    //Check Bitmap functionalities
+    set_sector_inUse(10000);
+    set_sector_inUse(10001);
+
+    int b = check_sector_usage(10000);
+
+    if(b==1){
+            serial_print("sector in use!\n");
+        }else if(b == 0){
+            serial_print("Sector is free\n");
+    }
+
+
+    set_sector_free(10001);
+    int c = check_sector_usage(10001);
+
+    if(c==1){
+            serial_print("sector in use!\n");
+        }else if(c == 0){
+            serial_print("Sector is free\n");
+    }
+
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)
