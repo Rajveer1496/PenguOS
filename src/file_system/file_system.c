@@ -95,6 +95,28 @@ int check_sector_usage(uint32_t sectorNO){
     return 0; // is free
 }
 
+int store_file(void * buffer, uint32_t size_bytes, char * name){
+    int sector_required = (size_bytes/512)+1;
+
+    uint16_t * buffer_16 = (uint16_t *)buffer
+
+    for(int i=1025 ; i < 2097152 ; i++ ){
+        if(check_sector_usage(i) == 0){
+            for(int j=i; j< i + sector_required; j++){
+                if(check_sector_usage(j) != 0){
+                    goto loop_end; //not ideal to store file
+                }
+            }
+            for(int j=i;j<i + sector_required - 1;j++){
+                write_sector(j,buffer_16);
+                buffer_16 += 256;
+            }
+        }
+        loop_end:
+    }
+    return 0;
+}
+
 /*
 TODO
 Files Metadata format
