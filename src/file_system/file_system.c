@@ -117,9 +117,9 @@ int check_sector_usage(uint32_t sectorNO){
 }
 
 int store_file(void * buffer, uint32_t size_bytes, char * name){
-    int sector_required = (size_bytes/512)+1; dcvvb  
+    int sector_required = (size_bytes/512)+1;
 
-    uint16_t * buffer_16 = (uint16_t *)buffer
+    uint16_t * buffer_16 = (uint16_t *)buffer;
 
     for(int i=1025 ; i < 2097152 ; i++ ){
         if(check_sector_usage(i) == 0){

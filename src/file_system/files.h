@@ -22,7 +22,7 @@ struct file{
     char name[100];
     int size_bytes; //in bytes
 
-}
+};
 
 //My solution #1
 /*
