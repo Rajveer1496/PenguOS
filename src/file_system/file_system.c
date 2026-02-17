@@ -3,6 +3,22 @@
 #include "memory.h"
 #include "debug.h"
 
+uint16_t * file_map_cache;
+
+int file_map_cache_init(){
+    file_map_cache = (uint16_t *)alloc_page();
+    return 0;
+}
+
+int file_map_cache_refresh(){
+    uint16_t * temp_file_map_cache = file_map_cache;
+    for(int i=1;i<1025;i++){
+        read_sector(i,temp_file_map_cache);
+        temp_file_map_cache += 256;
+    }
+    return 0;
+}
+
 // NOTE: for now mapping to use upto 1 TB (Maximum addressable sectors in 32 bit makes up to 2 TB)
 // 1 TB = 2097152 sectors
 // = 2097152 bit map entries
@@ -24,6 +40,11 @@ void initializeDriveBitmap(){
     }
 
     free_page(ZeroBuffer); // Free the buffer
+
+    //Initialise file map cache
+    file_map_cache_init(); 
+    file_map_cache_refresh(); 
+    
     serial_print("File system initialization complete!\n");
     return;
 }
@@ -96,7 +117,7 @@ int check_sector_usage(uint32_t sectorNO){
 }
 
 int store_file(void * buffer, uint32_t size_bytes, char * name){
-    int sector_required = (size_bytes/512)+1;
+    int sector_required = (size_bytes/512)+1; dcvvb  
 
     uint16_t * buffer_16 = (uint16_t *)buffer
 

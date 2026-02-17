@@ -14,6 +14,8 @@ extern int set_sector_inUse(uint32_t sectorNO);
 extern int check_sector_usage(uint32_t sectorNO);
 extern int set_sector_free(uint32_t sectorNO);
 extern int store_file(void * buffer, uint32_t size_bytes, char * name);
+extern int file_map_cache_init();
+extern int file_map_cache_refresh();
 
 //File metadata format
 struct file{
