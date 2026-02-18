@@ -10,14 +10,16 @@ int file_map_cache_init(){
     return 0;
 }
 
-int file_map_cache_refresh(){
-    uint16_t * temp_file_map_cache = file_map_cache;
-    for(int i=1;i<1025;i++){
-        read_sector(i,temp_file_map_cache);
-        temp_file_map_cache += 256;
-    }
-    return 0;
-}
+//-----------TODO - BUG - STOPPING AT SECTOR 237
+// int file_map_cache_refresh(){
+//     uint16_t * temp_file_map_cache = file_map_cache;
+//     for(int i=1;i<1025;i++){
+//         serial_print_number(i);
+//         read_sector(i,temp_file_map_cache);
+//         temp_file_map_cache += 256;
+//     }
+//     return 0;
+// }
 
 // NOTE: for now mapping to use upto 1 TB (Maximum addressable sectors in 32 bit makes up to 2 TB)
 // 1 TB = 2097152 sectors
@@ -39,11 +41,12 @@ void initializeDriveBitmap(){
         write_sector(i, ZeroBuffer);
     }
 
+
     free_page(ZeroBuffer); // Free the buffer
 
     //Initialise file map cache
     file_map_cache_init(); 
-    file_map_cache_refresh(); 
+    // file_map_cache_refresh(); 
     
     serial_print("File system initialization complete!\n");
     return;

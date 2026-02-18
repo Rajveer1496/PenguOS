@@ -13,4 +13,8 @@ void free_continous_pages(void *address,uint32_t count);
 void memcpy_fast(void* src, void* dest,uint32_t n);
 void memInit_fast(void* ptr, uint32_t Nobytes);
 
+//salloc.c
+int init_salloc();
+void * salloc(uint32_t bytes,uint32_t multiplier);
+
 #endif

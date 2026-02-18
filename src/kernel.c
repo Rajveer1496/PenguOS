@@ -7,6 +7,7 @@
 #include "drivers.h"
 #include "threading.h"
 #include "graphics.h"
+#include "memory.h"
 
 void break_ppp(){ //debug
     return;
@@ -278,6 +279,7 @@ void kernel_main(void) {
         }
     }
 
+
     //File system
     initializeDriveBitmap(); //File system Initialization
 
@@ -314,6 +316,15 @@ void kernel_main(void) {
             serial_print("sector in use!\n");
         }else if(c == 0){
             serial_print("Sector is free\n");
+    }
+
+
+    init_salloc(); //Salloc init
+    uint32_t * debug_int = salloc(4,5);
+    uint32_t * debug_int_2 = salloc(1,1);
+
+    for(int i=0;i<5000;i++){
+        salloc(4,5);
     }
 
 
