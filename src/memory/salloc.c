@@ -45,8 +45,6 @@ void * salloc(uint32_t bytes,uint32_t multiplier){ //NOTE: WATCH BOUNDARIES
             //Get no of bit in bitmap
             //check if its free or not
 
-            loop_start:
-
             int word_index = j/32;
             int bit_index = j%32;
 
@@ -60,13 +58,22 @@ void * salloc(uint32_t bytes,uint32_t multiplier){ //NOTE: WATCH BOUNDARIES
                     int bit_index_2 = (j+k)%32;
 
                     if(temp_ptr_big_page[word_index_2] & (1<<bit_index_2)){ // j+k sector is in use
-                        j += k; //now look at next available big chunk
-                        goto loop_start;
+                        j += (k-1); //now look at next available big chunk (-1 cuz loop will do j++)
+                        goto loop_end;
                     }
                 }
+
                 temp_ptr_big_page[word_index] = (temp_ptr_big_page[word_index]) | (1<<bit_index); //set sector in use
+                for(int k=0;k<sector_needed;k++){ //Mark all sectors in use
+                    int word_index_2 = (j+k)/32;
+                    int bit_index_2 = (j+k)%32;
+
+                    temp_ptr_big_page[word_index_2] = (temp_ptr_big_page[word_index_2]) | (1<<bit_index_2);
+                }
                 return (temp_ptr_big_page + j);
             }
+
+            loop_end:
         }
     }
     //ALL BIG PAGES USED, get new one
@@ -75,12 +82,24 @@ void * salloc(uint32_t bytes,uint32_t multiplier){ //NOTE: WATCH BOUNDARIES
     goto start;
 }
 
-int sfree(void * address, uint32_t multiplier){ 
-//  ---TODO---
+int sfree(void * address, uint32_t bytes,uint32_t multiplier){ 
 
-//check in which BIG PAGE it lives
-//set value in bitmap free
+// NOTE: Here Base_Address + 1024 will give whole 4KB range cuz pointer is of 32 bit (4 bytes)
 
+for(int i=1; i<=counter_big_page;i++){
+    uint32_t * temp_ptr_big_page = bigmap[i];
+    if((address >= bigmap[i]) && (address <= (bigmap[i] + 1024 ))){ //in the range of current BIG page
+        uint32_t sector_no = ((uint32_t)address - (uint32_t)bigmap[i])/4;
+        int sector_needed = (bytes*multiplier)/4;
+
+        for(int k=0;k<sector_needed;k++){ //Mark all sectors free
+            int word_index_2 = (sector_no+k)/32;
+            int bit_index_2 = (sector_no+k)%32;
+
+            temp_ptr_big_page[word_index_2] = (temp_ptr_big_page[word_index_2]) & ~(1<<bit_index_2);
+        }
+    }
+}
     return 0;
 }
 

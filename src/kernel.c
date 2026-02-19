@@ -321,12 +321,19 @@ void kernel_main(void) {
 
     init_salloc(); //Salloc init
     uint32_t * debug_int = salloc(4,5);
-    uint32_t * debug_int_2 = salloc(1,1);
+    
+
+    uint32_t * debug_int_2 = salloc(4,5);
+    // sfree(debug_int_2,4,5);
+
+    sfree(debug_int,4,5);
+
+    uint32_t * debug_int_3 = salloc(4,5);
+    sfree(debug_int_3,4,5);
 
     for(int i=0;i<5000;i++){
         salloc(4,5);
     }
-
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)

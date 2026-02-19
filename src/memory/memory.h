@@ -16,5 +16,6 @@ void memInit_fast(void* ptr, uint32_t Nobytes);
 //salloc.c
 int init_salloc();
 void * salloc(uint32_t bytes,uint32_t multiplier);
+int sfree(void * address, uint32_t bytes,uint32_t multiplier);
 
 #endif
