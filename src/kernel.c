@@ -183,6 +183,9 @@ void testProcess2(){
     }
 }
 
+//TESTING
+extern void render_test();
+
 // This is called by kernel_entry.asm!
 void kernel_main(void) {
 
@@ -241,7 +244,7 @@ void kernel_main(void) {
 
 
     //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
-    disk_init();
+    // disk_init();
 
     serial_print("NICEE\n");
 
@@ -259,64 +262,64 @@ void kernel_main(void) {
 
 
     //The read write test
-    uint16_t test_buffer[256];
-    uint16_t test_buffer2[256];
-    // Fill with test data
-    for(int i = 0; i < 256; i++) {
-        test_buffer[i] = i;
-    }
+    // uint16_t test_buffer[256];
+    // uint16_t test_buffer2[256];
+    // // Fill with test data
+    // for(int i = 0; i < 256; i++) {
+    //     test_buffer[i] = i;
+    // }
 
-    // Write to sector 100
-    write_sector(100, test_buffer);
+    // // Write to sector 100
+    // write_sector(100, test_buffer);
 
-    // Read back
-    read_sector(100, test_buffer2);
+    // // Read back
+    // read_sector(100, test_buffer2);
 
-    // Verify
-    for(int i = 0; i < 256; i++) {
-        if(test_buffer[i] != test_buffer2[i]) {
-            serial_print("MISMATCH!\n");
-        }
-    }
-
-
-    //File system
-    initializeDriveBitmap(); //File system Initialization
-
-    // Check file system Bitmap initialisation
-    uint16_t test_buffer3[256];
-    for(int i=1;i<1024;i++){
-        read_sector(i,test_buffer3);
-        for(int j=0;j<256;j++){
-            if(test_buffer3[j] != 0){
-                serial_print("Bitmap Not initialized correctly!\n");
-                serial_print("At sector: ");
-                serial_print_number(i);
-            }
-        }
-    }
-
-    //Check Bitmap functionalities
-    set_sector_inUse(10000);
-    set_sector_inUse(10001);
-
-    int b = check_sector_usage(10000);
-
-    if(b==1){
-            serial_print("sector in use!\n");
-        }else if(b == 0){
-            serial_print("Sector is free\n");
-    }
+    // // Verify
+    // for(int i = 0; i < 256; i++) {
+    //     if(test_buffer[i] != test_buffer2[i]) {
+    //         serial_print("MISMATCH!\n");
+    //     }
+    // }
 
 
-    set_sector_free(10001);
-    int c = check_sector_usage(10001);
+    // //File system
+    // initializeDriveBitmap(); //File system Initialization
 
-    if(c==1){
-            serial_print("sector in use!\n");
-        }else if(c == 0){
-            serial_print("Sector is free\n");
-    }
+    // // Check file system Bitmap initialisation
+    // uint16_t test_buffer3[256];
+    // for(int i=1;i<1024;i++){
+    //     read_sector(i,test_buffer3);
+    //     for(int j=0;j<256;j++){
+    //         if(test_buffer3[j] != 0){
+    //             serial_print("Bitmap Not initialized correctly!\n");
+    //             serial_print("At sector: ");
+    //             serial_print_number(i);
+    //         }
+    //     }
+    // }
+
+    // //Check Bitmap functionalities
+    // set_sector_inUse(10000);
+    // set_sector_inUse(10001);
+
+    // int b = check_sector_usage(10000);
+
+    // if(b==1){
+    //         serial_print("sector in use!\n");
+    //     }else if(b == 0){
+    //         serial_print("Sector is free\n");
+    // }
+
+
+    // set_sector_free(10001);
+    // int c = check_sector_usage(10001);
+
+    // if(c==1){
+    //         serial_print("sector in use!\n");
+    //     }else if(c == 0){
+    //         serial_print("Sector is free\n");
+    // }
 
 
     init_salloc(); //Salloc init
@@ -334,6 +337,9 @@ void kernel_main(void) {
     for(int i=0;i<5000;i++){
         salloc(4,5);
     }
+
+    set_mode_13h();
+    render_test();
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)
