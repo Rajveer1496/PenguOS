@@ -1,0 +1,2 @@
+# 1. VESA/VBE
+# 2. FPU

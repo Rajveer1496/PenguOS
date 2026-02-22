@@ -2,6 +2,12 @@ org 0x7E00 ;stage 2 right after stage 1 boot loader
 bits 16
 stage_2_start:
 
+; TODO -> SETUP VBE before protected mode
+
+
+
+jmp done ;TEMPPP
+
 lgdt [gdt_descriptor] ;LOAD GDT
 
     mov eax, cr0      ; Read CR0
@@ -247,6 +253,12 @@ print_hex_simple:
     
     loop .loop
     ret
+
+
+; VBE Structure
+vbe_info_structure:
+	.signature		db "VBE2"	; indicate support for VBE 2.0+
+	.table_data:		resb 512-4	; reserve space for the table below
     
 ; Pad to 4096 bytes (1-8 sectors)
 times 4096 - ($ - $$) db 0
