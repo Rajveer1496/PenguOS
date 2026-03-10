@@ -1,13 +1,56 @@
 org 0x7E00 ;stage 2 right after stage 1 boot loader
 bits 16
+; NOTE: Make sure to put real mode code inside bits 16 directive
+; Word in 16 bit mode is of 16 bits (2 bytes)
+
+;------------------------------------------------ 16 bits -----------------------------------------
+
 stage_2_start:
 
-; TODO -> SETUP VBE before protected mode
+; TODO -> Select VBE Mode
+set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
 
+.get_vesa_info:
+    mov ax,0x0
+    mov es,ax ;es=0
+    mov di, vbe_info_structure
 
+    mov ax,0x4F00
+    int 0x10
+    cmp al,0x4F
+    jne VBE_err
+
+    mov ah,0x0D
+    mov al,'A'
+    call print_char
+
+; Selecting Mode
+.get_vesa_mode_info:
+    mov ax,0x0
+    mov es,ax ;es=0
+    mov di, vbe_mode_structure
+    mov cx, [vbe_info_structure.VideoModesOffset]
+    mov ax, 0x4F01
+    int 0x10
+
+    cmp cx, 0xffff							;	vesa modes list empty
+	je NoModes
+
+    mov ah,0x0D
+    mov al,'B'
+    call print_char
+
+    jmp done
+
+VBE_err:
+NoModes:
+    mov ah,0x0E
+    mov al,'N'
+    call print_char
 
 jmp done ;TEMPPP
 
+;-------------------------------------- Jump to protected Mode ---------------------------------
 lgdt [gdt_descriptor] ;LOAD GDT
 
     mov eax, cr0      ; Read CR0
@@ -60,7 +103,82 @@ gdt_descriptor:
 CODE_SEG equ gdt_code - gdt_start  ; 0x08
 DATA_SEG equ gdt_data - gdt_start  ; 0x10
 
+;input AL = character
+;AH = colour
+print_char:
+    push di
+    push es
+    push eax
+    mov ax,0xB800
+    mov es,ax   ;ds=a 0xB800
+    xor di,di   ;di=0
+    pop eax
+    mov [es:di], ax
 
+    pop es
+    pop di
+    ret
+
+; VBE Structure
+vbe_info_structure:
+	.Signature		resb 4		;	must be 'VESA'
+	.Version		resw 1
+	.OEMNamePtr		resd 1
+	.Capabilities		resd 1
+
+	.VideoModesOffset	resw 1
+	.VideoModesSegment	resw 1
+
+	.CountOf64KBlocks	resw 1
+	.OEMSoftwareRevision    resw 1
+	.OEMVendorNamePtr	resd 1
+	.OEMProductNamePtr	resd 1
+	.OEMProductRevisionPtr	resd 1
+	.Reserved		resb 222
+	.OEMData		resb 256
+
+; VBE mode info - upon queryin about each mode, it returns this structure
+vbe_mode_structure:				;	VesaModeInfoBlock_size = 256 bytes
+	.ModeAttributes		resw 1
+	.FirstWindowAttributes	resb 1
+	.SecondWindowAttributes	resb 1
+	.WindowGranularity	resw 1		;	in KB
+	.WindowSize		resw 1		;	in KB
+	.FirstWindowSegment	resw 1		;	0 if not supported
+	.SecondWindowSegment	resw 1		;	0 if not supported
+	.WindowFunctionPtr	resd 1
+	.BytesPerScanLine	resw 1
+
+	.Width			resw 1		;	in pixels(graphics)/columns(text)
+	.Height			resw 1		;	in pixels(graphics)/columns(text)
+	.CharWidth		resb 1		;	in pixels
+	.CharHeight		resb 1		;	in pixels
+	.PlanesCount		resb 1
+	.BitsPerPixel		resb 1
+	.BanksCount		resb 1
+	.MemoryModel		resb 1
+	.BankSize		resb 1		;	in KB
+	.ImagePagesCount	resb 1		;	count - 1
+	.Reserved1		resb 1		;	equals 0 in Revision 1.0-2.0, 1 in 3.0
+
+	.RedMaskSize		resb 1
+	.RedFieldPosition	resb 1
+	.GreenMaskSize		resb 1
+	.GreenFieldPosition	resb 1
+	.BlueMaskSize		resb 1
+	.BlueFieldPosition	resb 1
+	.ReservedMaskSize	resb 1
+	.ReservedMaskPosition	resb 1
+	.DirectColorModeInfo	resb 1
+
+	.LFBAddress		resd 1
+	.OffscreenMemoryOffset	resd 1
+	.OffscreenMemorySize	resw 1		;	in KB
+	.Reserved2		resb 206   
+
+;-------------------------------------------------- 32 bit --------------------------------------
+
+; 32 bit mode directive
 bits 32
 protected_mode_setup:
     ; Load data segment selector into all data segment registers
@@ -254,11 +372,6 @@ print_hex_simple:
     loop .loop
     ret
 
-
-; VBE Structure
-vbe_info_structure:
-	.signature		db "VBE2"	; indicate support for VBE 2.0+
-	.table_data:		resb 512-4	; reserve space for the table below
     
 ; Pad to 4096 bytes (1-8 sectors)
 times 4096 - ($ - $$) db 0
