@@ -1,4 +1,67 @@
 org 0x7E00 ;stage 2 right after stage 1 boot loader
+
+section .bss
+
+; VBE Structure
+vbe_info_structure:
+	.Signature		resb 4		;	must be 'VESA'
+	.Version		resw 1
+	.OEMNamePtr		resd 1
+	.Capabilities		resd 1
+
+	.VideoModesOffset	resw 1
+	.VideoModesSegment	resw 1
+
+	.CountOf64KBlocks	resw 1
+	.OEMSoftwareRevision    resw 1
+	.OEMVendorNamePtr	resd 1
+	.OEMProductNamePtr	resd 1
+	.OEMProductRevisionPtr	resd 1
+	.Reserved		resb 222
+	.OEMData		resb 256
+
+; VBE mode info - upon queryin about each mode, it returns this structure
+vbe_mode_structure:				;	VesaModeInfoBlock_size = 256 bytes
+	.ModeAttributes		resw 1
+	.FirstWindowAttributes	resb 1
+	.SecondWindowAttributes	resb 1
+	.WindowGranularity	resw 1		;	in KB
+	.WindowSize		resw 1		;	in KB
+	.FirstWindowSegment	resw 1		;	0 if not supported
+	.SecondWindowSegment	resw 1		;	0 if not supported
+	.WindowFunctionPtr	resd 1
+	.BytesPerScanLine	resw 1
+
+	.Width			resw 1		;	in pixels(graphics)/columns(text)
+	.Height			resw 1		;	in pixels(graphics)/columns(text)
+	.CharWidth		resb 1		;	in pixels
+	.CharHeight		resb 1		;	in pixels
+	.PlanesCount		resb 1
+	.BitsPerPixel		resb 1
+	.BanksCount		resb 1
+	.MemoryModel		resb 1
+	.BankSize		resb 1		;	in KB
+	.ImagePagesCount	resb 1		;	count - 1
+	.Reserved1		resb 1		;	equals 0 in Revision 1.0-2.0, 1 in 3.0
+
+	.RedMaskSize		resb 1
+	.RedFieldPosition	resb 1
+	.GreenMaskSize		resb 1
+	.GreenFieldPosition	resb 1
+	.BlueMaskSize		resb 1
+	.BlueFieldPosition	resb 1
+	.ReservedMaskSize	resb 1
+	.ReservedMaskPosition	resb 1
+	.DirectColorModeInfo	resb 1
+
+	.LFBAddress		resd 1
+	.OffscreenMemoryOffset	resd 1
+	.OffscreenMemorySize	resw 1		;	in KB
+	.Reserved2		resb 206   
+
+
+section .text
+
 bits 16
 ; NOTE: Make sure to put real mode code inside bits 16 directive
 ; Word in 16 bit mode is of 16 bits (2 bytes)
@@ -25,6 +88,8 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     call print_char
 
 ; Selecting Mode
+;Input: cx = mode
+; es:di = targetBuffer (vbe_mode_structure)
 .get_vesa_mode_info:
     mov ax,0x0
     mov es,ax ;es=0
@@ -40,7 +105,11 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     mov al,'B'
     call print_char
 
-    jmp done
+.print_vesa_mode_resolution:
+    mov eax,0XFF
+    call print_hex_simple
+
+jmp done
 
 VBE_err:
 NoModes:
@@ -119,62 +188,34 @@ print_char:
     pop di
     ret
 
-; VBE Structure
-vbe_info_structure:
-	.Signature		resb 4		;	must be 'VESA'
-	.Version		resw 1
-	.OEMNamePtr		resd 1
-	.Capabilities		resd 1
+; Input: EAX = value to print
+; Destroys: EBX, ECX, EDI
+print_hex_simple:
+    mov edi, 0xB800        ; VGA buffer start
+    mov ecx, 8              ; 8 hex digits
+    
+.loop:
+    rol eax, 4              ; Get next nibble
+    mov ebx, eax
+    and ebx, 0x0F           ; Isolate 4 bits
+    
+    ; Convert to hex char
+    cmp ebx, 9
+    jg .letter
+    add ebx, '0'            ; 0-9
+    jmp .write
+.letter:
+    add ebx, 'A' - 10       ; A-F
+    
+.write:
+    mov byte [edi], bl      ; Write character
+    mov byte [edi+1], 0x0F  ; White on black
+    add edi, 2
+    
+    loop .loop
+    ret
 
-	.VideoModesOffset	resw 1
-	.VideoModesSegment	resw 1
 
-	.CountOf64KBlocks	resw 1
-	.OEMSoftwareRevision    resw 1
-	.OEMVendorNamePtr	resd 1
-	.OEMProductNamePtr	resd 1
-	.OEMProductRevisionPtr	resd 1
-	.Reserved		resb 222
-	.OEMData		resb 256
-
-; VBE mode info - upon queryin about each mode, it returns this structure
-vbe_mode_structure:				;	VesaModeInfoBlock_size = 256 bytes
-	.ModeAttributes		resw 1
-	.FirstWindowAttributes	resb 1
-	.SecondWindowAttributes	resb 1
-	.WindowGranularity	resw 1		;	in KB
-	.WindowSize		resw 1		;	in KB
-	.FirstWindowSegment	resw 1		;	0 if not supported
-	.SecondWindowSegment	resw 1		;	0 if not supported
-	.WindowFunctionPtr	resd 1
-	.BytesPerScanLine	resw 1
-
-	.Width			resw 1		;	in pixels(graphics)/columns(text)
-	.Height			resw 1		;	in pixels(graphics)/columns(text)
-	.CharWidth		resb 1		;	in pixels
-	.CharHeight		resb 1		;	in pixels
-	.PlanesCount		resb 1
-	.BitsPerPixel		resb 1
-	.BanksCount		resb 1
-	.MemoryModel		resb 1
-	.BankSize		resb 1		;	in KB
-	.ImagePagesCount	resb 1		;	count - 1
-	.Reserved1		resb 1		;	equals 0 in Revision 1.0-2.0, 1 in 3.0
-
-	.RedMaskSize		resb 1
-	.RedFieldPosition	resb 1
-	.GreenMaskSize		resb 1
-	.GreenFieldPosition	resb 1
-	.BlueMaskSize		resb 1
-	.BlueFieldPosition	resb 1
-	.ReservedMaskSize	resb 1
-	.ReservedMaskPosition	resb 1
-	.DirectColorModeInfo	resb 1
-
-	.LFBAddress		resd 1
-	.OffscreenMemoryOffset	resd 1
-	.OffscreenMemorySize	resw 1		;	in KB
-	.Reserved2		resb 206   
 
 ;-------------------------------------------------- 32 bit --------------------------------------
 
@@ -345,32 +386,6 @@ ata_read: ;LBA mode
     popfd
     ret
     
-; Input: EAX = value to print
-; Destroys: EBX, ECX, EDI
-print_hex_simple:
-    mov edi, 0xB8000        ; VGA buffer start
-    mov ecx, 8              ; 8 hex digits
-    
-.loop:
-    rol eax, 4              ; Get next nibble
-    mov ebx, eax
-    and ebx, 0x0F           ; Isolate 4 bits
-    
-    ; Convert to hex char
-    cmp ebx, 9
-    jg .letter
-    add ebx, '0'            ; 0-9
-    jmp .write
-.letter:
-    add ebx, 'A' - 10       ; A-F
-    
-.write:
-    mov byte [edi], bl      ; Write character
-    mov byte [edi+1], 0x0F  ; White on black
-    add edi, 2
-    
-    loop .loop
-    ret
 
     
 ; Pad to 4096 bytes (1-8 sectors)
