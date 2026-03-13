@@ -106,7 +106,7 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     call print_char
 
 .print_vesa_mode_resolution:
-    mov eax,0XFF
+    mov eax,[vbe_mode_structure.Width]
     call print_hex_simple
 
 jmp done
@@ -190,29 +190,34 @@ print_char:
 
 ; Input: EAX = value to print
 ; Destroys: EBX, ECX, EDI
+; Input: EAX = value to print
 print_hex_simple:
-    mov edi, 0xB800        ; VGA buffer start
-    mov ecx, 8              ; 8 hex digits
-    
+    pusha
+    mov bx, 0xB800
+    mov es, bx
+    xor di, di
+
+    mov cx, 8
 .loop:
-    rol eax, 4              ; Get next nibble
-    mov ebx, eax
-    and ebx, 0x0F           ; Isolate 4 bits
-    
-    ; Convert to hex char
-    cmp ebx, 9
+    rol eax, 4
+    mov bx, ax
+    and bx, 0x0F
+
+    cmp bx, 9
     jg .letter
-    add ebx, '0'            ; 0-9
+    add bx, '0'
     jmp .write
 .letter:
-    add ebx, 'A' - 10       ; A-F
-    
+    add bx, 'A' - 10
 .write:
-    mov byte [edi], bl      ; Write character
-    mov byte [edi+1], 0x0F  ; White on black
-    add edi, 2
-    
-    loop .loop
+    mov [es:di], bl
+    mov byte [es:di+1], 0x0F
+    add di, 2
+
+    dec cx
+    jnz .loop
+
+    popa
     ret
 
 
