@@ -84,8 +84,6 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     jne VBE_err
 
     mov ah,0x0D
-    mov al,'A'
-    call print_char
 
 ; Selecting Mode
 ;Input: cx = mode
@@ -94,28 +92,47 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     mov ax,0x0
     mov es,ax ;es=0
     mov di, vbe_mode_structure
-    mov cx, [vbe_info_structure.VideoModesOffset]
+
+    mov bx, [vbe_info_structure.VideoModesOffset]
+    add bx,2
+    add bx,2
+    mov cx, [bx]
     mov ax, 0x4F01
     int 0x10
 
     cmp cx, 0xffff							;	vesa modes list empty
 	je NoModes
 
-    mov ah,0x0D
-    mov al,'B'
+    xor di,di
+    push 0x0D
+    push 'B'
     call print_char
+    add esp,4
 
-.print_vesa_mode_resolution:
-    mov eax,[vbe_mode_structure.Width]
+.print_vesa_mode_resolution: ; Note: Height and width are 16 bit numbers
+    ; xor eax,eax
+    ; mov ax,[vbe_mode_structure.Width]
+    ; ; mov eax,[vbe_info_structure.VideoModesOffset]
+    ; call print_hex_simple
+
+    ; mov eax, [cursorPosX]
+    ; push 0xFFFFFFFF
+    push dword 0x4
+    push dword 0x1
+    push dword 0x0
+    push dword 0xDEADBEEF ;NOTE: in 16 bits it only pushes 2 bytes by default
     call print_hex_simple
+    add esp,16 ;cleanup
 
 jmp done
 
 VBE_err:
 NoModes:
-    mov ah,0x0E
-    mov al,'N'
+    xor di,di
+    push 0x0E
+    push 'N'
     call print_char
+    add esp,4
 
 jmp done ;TEMPPP
 
@@ -172,53 +189,102 @@ gdt_descriptor:
 CODE_SEG equ gdt_code - gdt_start  ; 0x08
 DATA_SEG equ gdt_data - gdt_start  ; 0x10
 
-;input AL = character
-;AH = colour
+; di = offset
+; 2nd para = color
+; 1st para = charachter
 print_char:
-    push di
-    push es
     push eax
+    push es
     mov ax,0xB800
     mov es,ax   ;ds=a 0xB800
-    xor di,di   ;di=0
-    pop eax
+    
+    mov al,[esp + 8] ; charachter
+    mov ah,[esp + 10] ; color
     mov [es:di], ax
 
+    pop eax
     pop es
-    pop di
-    ret
+ret
 
-; Input: EAX = value to print
-; Destroys: EBX, ECX, EDI
-; Input: EAX = value to print
+; 4th para = length to string
+; 3rd para = posY
+; 2nd para = posX
+; 1st para = address of string
+
+print_string:
+    pushad
+
+    .getPos: 
+        xor di, di ;offset
+        mov eax,[VGA_WIDTH]
+        mov ebx,[esp+42] ; Y pos
+        mul ebx
+        mov ebx,[esp+38] ; X pos
+        add eax,ebx
+
+        xor ebx,ebx
+        mov ebx,0x2
+        mul ebx
+        
+        mov di,ax ;final offset
+
+    ;TODO print whole string
+
+
+
+
+    popad
+ret
+
+
+; 4th para = length to print
+; 3rd para = posY
+; 2nd para = posX
+; 1st para = Value to print
+VGA_WIDTH dd 80
 print_hex_simple:
-    pusha
+    pushad ; Push EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
+
     mov bx, 0xB800
-    mov es, bx
-    xor di, di
+    mov es, bx ;es = 0xB800
+    .getPos: 
+        xor di, di ;offset
+        mov eax,[VGA_WIDTH]
+        mov ebx,[esp+42] ; Y pos
+        mul ebx
+        mov ebx,[esp+38] ; X pos
+        add eax,ebx
 
-    mov cx, 8
-.loop:
-    rol eax, 4
-    mov bx, ax
-    and bx, 0x0F
+        xor ebx,ebx
+        mov ebx,0x2
+        mul ebx
+        
+        mov di,ax ;final offset
 
-    cmp bx, 9
-    jg .letter
-    add bx, '0'
-    jmp .write
-.letter:
-    add bx, 'A' - 10
-.write:
-    mov [es:di], bl
-    mov byte [es:di+1], 0x0F
-    add di, 2
+
+    mov eax, [esp+34] ;value to print
+    mov cx, [esp+46] ;length to print
+    .loop:
+        rol eax, 4
+        mov bx, ax
+        and bx, 0x0F
+
+        cmp bx, 9
+        jg .letter
+        add bx, '0'
+        jmp .write
+    .letter:
+        add bx, 'A' - 10
+    .write:
+        mov [es:di], bl ; Address: es * 0x10 + di = 0xB8000 + 0
+        mov byte [es:di+1], 0x0F
+        add di, 2
 
     dec cx
     jnz .loop
-
-    popa
-    ret
+        
+    popad
+ret
 
 
 
