@@ -68,12 +68,94 @@ bits 16
 
 ;------------------------------------------------ 16 bits -----------------------------------------
 
+%macro PRINT_STRING 4
+    push dword %4
+    push dword %3
+    push dword %2
+    push dword %1
+    call print_string
+    add esp,16
+%endmacro
+
+%macro PRINT_HEX 3
+    push word %3
+    push word %2
+    push word %1
+    call print_hex_simple
+    add esp,6 ;cleanup
+%endmacro
+
+%macro GET_VESA_MODE_INFO 1
+    push dword %1
+    call get_vesa_mode_info
+    add esp,2
+%endmacro
+
 stage_2_start:
 
 ; TODO -> Select VBE Mode
 set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
 
-.get_vesa_info:
+    call vga_clear
+
+.print_vesa_mode_resolution: ; Note: Height and width are 16 bit numbers
+
+    call get_vesa_info
+
+    PRINT_STRING message,0,1,10
+
+    GET_VESA_MODE_INFO 0
+
+    PRINT_STRING msg_MODE,0,2,4
+    PRINT_STRING msg_RESOLUTION,6,2,10
+    PRINT_STRING msg_BITS,19,2,14
+
+    mov cx,66
+    mov eax,3 ; y pos
+    .print_all_modes:
+
+        GET_VESA_MODE_INFO cx
+
+        ;print MODE
+        push bx
+        push ax
+        mov ax,cx
+        mov bx,0x2
+        mul bx
+        mov bx, [vbe_info_structure.VideoModesOffset]
+        add bx,ax
+        pop ax
+        PRINT_HEX [bx],0,ax
+        pop bx
+
+        PRINT_HEX [vbe_mode_structure.Width],6,ax ;Resolution width
+
+        PRINT_STRING msg_cross,11,eax,1
+
+        PRINT_HEX [vbe_mode_structure.Height],13,ax ;Resolution Height
+
+                
+        xor bx,bx
+        mov bl,[vbe_mode_structure.BitsPerPixel]
+        PRINT_HEX bx,24,ax ;Bits per pixel
+
+        inc eax
+        inc cx
+        cmp cx,88
+        jne .print_all_modes
+
+    call set_vesa_mode
+
+jmp done
+
+msg_cross db "x",0
+msg_MODE db "MODE",0
+msg_RESOLUTION db "RESOLUTION",0
+msg_BITS db "BITS_PER_PIXEL",0
+msg_MAX_COLORS db "MAXIMUM_COLORS",0
+
+get_vesa_info:
+    pushad
     mov ax,0x0
     mov es,ax ;es=0
     mov di, vbe_info_structure
@@ -84,18 +166,22 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     jne VBE_err
 
     mov ah,0x0D
+    popad
+ret
 
 ; Selecting Mode
-;Input: cx = mode
-; es:di = targetBuffer (vbe_mode_structure)
-.get_vesa_mode_info:
+; 1st para no. of mode
+get_vesa_mode_info:
+    pushad ;32
     mov ax,0x0
     mov es,ax ;es=0
     mov di, vbe_mode_structure
 
+    mov ax,[esp+34]
+    mov bx,0x2
+    mul bx
     mov bx, [vbe_info_structure.VideoModesOffset]
-    add bx,2
-    add bx,2
+    add bx,ax
     mov cx, [bx]
     mov ax, 0x4F01
     int 0x10
@@ -108,33 +194,37 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     push 'B'
     call print_char
     add esp,4
+    
+    popad
+ret
 
-.print_vesa_mode_resolution: ; Note: Height and width are 16 bit numbers
-    ; xor eax,eax
-    ; mov ax,[vbe_mode_structure.Width]
-    ; ; mov eax,[vbe_info_structure.VideoModesOffset]
-    ; call print_hex_simple
+set_vesa_mode:
+    pushad
 
-    ; mov eax, [cursorPosX]
-    ; push 0xFFFFFFFF
-    push dword 0x4
-    push dword 0x1
-    push dword 0x0
-    push dword 0xDEADBEEF ;NOTE: in 16 bits it only pushes 2 bytes by default
-    call print_hex_simple
-    add esp,16 ;cleanup
+    mov ax,0x4F02
+    ;0x18E mode -> 1280x720x24
+    mov bx,0x18E ;bits 0-13 mode number, bit 14 (LFB) enables linear frame buffer, bit 15 (DM) to clear screen
+    or bx,0x4000 ;enable LFB
+    mov di,0
+    int 0x10
 
-jmp done
+    cmp ax, 0x004F	; test for error
+    jne VBE_err
+
+    popad
+ret
+
+
 
 VBE_err:
 NoModes:
-    xor di,di
-    push 0x0E
-    push 'N'
-    call print_char
-    add esp,4
+    PRINT_STRING err_msg,0,0,26
 
 jmp done ;TEMPPP
+
+err_msg db "ERROR: CANT GET VBE MODES!",0
+
+message db "VBE MODES:",0
 
 ;-------------------------------------- Jump to protected Mode ---------------------------------
 lgdt [gdt_descriptor] ;LOAD GDT
@@ -202,8 +292,8 @@ print_char:
     mov ah,[esp + 10] ; color
     mov [es:di], ax
 
-    pop eax
     pop es
+    pop eax
 ret
 
 ; 4th para = length to string
@@ -230,8 +320,39 @@ print_string:
 
     ;TODO print whole string
 
+    mov cx,[esp+46] ; lenght of string
+    mov eax,[esp+34] ; Address of string
 
+    .print_one_char:
+        push 0x0E
+        push word [eax]
+        call print_char
+        add esp,4
 
+        inc eax
+        add di,2
+
+        dec cx
+        jnz .print_one_char
+
+    popad
+ret
+
+vga_clear:
+    pushad
+    mov cx,2000
+    xor di,di
+
+    .print_one_char:
+    push 0x0E
+    push ' '
+    call print_char
+    add esp,4
+
+    add di,2
+
+    dec cx
+    jnz .print_one_char
 
     popad
 ret
@@ -249,23 +370,23 @@ print_hex_simple:
     mov es, bx ;es = 0xB800
     .getPos: 
         xor di, di ;offset
-        mov eax,[VGA_WIDTH]
-        mov ebx,[esp+42] ; Y pos
-        mul ebx
-        mov ebx,[esp+38] ; X pos
-        add eax,ebx
+        mov ax,[VGA_WIDTH]
+        mov bx,[esp+38] ; Y pos
+        mul bx
+        mov bx,[esp+36] ; X pos
+        add ax,bx
 
-        xor ebx,ebx
-        mov ebx,0x2
-        mul ebx
+        xor bx,bx
+        mov bx,0x2
+        mul bx
         
         mov di,ax ;final offset
 
 
-    mov eax, [esp+34] ;value to print
-    mov cx, [esp+46] ;length to print
+    mov ax, [esp+34] ;value to print
+    mov cx, 4
     .loop:
-        rol eax, 4
+        rol ax, 4
         mov bx, ax
         and bx, 0x0F
 
@@ -285,7 +406,6 @@ print_hex_simple:
         
     popad
 ret
-
 
 
 ;-------------------------------------------------- 32 bit --------------------------------------
