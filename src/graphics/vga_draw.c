@@ -138,9 +138,5 @@ void write_pixel_BackBuffer(int x, int y, uint8_t color){
 }
 
 void vga_clear_backBuffer(){
-    uint32_t* d = (uint32_t *)backBuffer;
-    for(int i=0; i<16000; i++){ //writing 4 bytes at a time
-        d[i] =0x0;
-    }
+    memInit_fast(backBuffer,64000);
 }
-

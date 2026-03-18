@@ -30,8 +30,47 @@ int file_map_cache_init(){
 
 // here reserving upto 1024 sectors (2 TB)
 
+int test_Driver_Bitmap(){
+        // Check file system Bitmap initialisation
+    uint16_t test_buffer3[256];
+    for(int i=1;i<1024;i++){
+        read_sector(i,test_buffer3);
+        for(int j=0;j<256;j++){
+            if(test_buffer3[j] != 0){
+                serial_print("Bitmap Not initialized correctly!\n");
+                serial_print("At sector: ");
+                serial_print_number(i);
+                return -1;
+            }
+        }
+    }
+
+    //Check Bitmap functionalities
+    set_sector_inUse(10000);
+    set_sector_inUse(10001);
+
+    int b = check_sector_usage(10000);
+
+    if(b!=1){
+        serial_print("ERROR: In Drive Bitmap initialisation.\n");
+        return -1;
+    }
+
+
+
+    set_sector_free(10001);
+    int c = check_sector_usage(10001);
+
+    if(c!=0){
+        serial_print("ERROR: In Drive Bitmap initialisation.\n");
+        return -1;
+    }
+
+    return 0; //sucess
+}
+
 // FIRST 1024 sectors of disk will be used for bitMap
-void initializeDriveBitmap(){
+int initializeDriveBitmap(){
     // uint16_t ZeroBuffer[256];
     uint16_t * ZeroBuffer = (uint16_t *)alloc_page(); //Dont wanted to use stack
     memInit_fast(ZeroBuffer, 4096); // Whole Buffer to 0
@@ -49,7 +88,12 @@ void initializeDriveBitmap(){
     // file_map_cache_refresh(); 
     
     serial_print("File system initialization complete!\n");
-    return;
+
+    if(test_Driver_Bitmap() == -1){
+        return -1;
+    }
+
+    return 0;
 }
 
 

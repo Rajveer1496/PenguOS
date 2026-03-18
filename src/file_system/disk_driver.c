@@ -109,6 +109,32 @@ int write_sector(uint32_t sectorNO, uint16_t * buffer){
     return 0; //sucess
 }
 
+int test_disk(){
+     // The read write test
+    uint16_t test_buffer[256];
+    uint16_t test_buffer2[256];
+    // Fill with test data
+    for(int i = 0; i < 256; i++) {
+        test_buffer[i] = i;
+    }
+
+    // Write to sector 100
+    write_sector(100, test_buffer);
+
+    // Read back
+    read_sector(100, test_buffer2);
+
+    // Verify
+    for(int i = 0; i < 256; i++) {
+        if(test_buffer[i] != test_buffer2[i]) {
+            serial_print("ERROR: MISMATCH Disk Sectors!\n");
+            return -1; //error
+        }
+    }
+
+    return 0; //success
+}
+
 //---DISK INITIALISATION FUNCTION---
 int disk_init(){
     pic_unmask(14);  // Enable ATA interrupts
@@ -173,6 +199,10 @@ int disk_init(){
     serial_print(disk_name);
     serial_print("\n");
     serial_print("Disk initialization Complete!\n");
+
+    if(test_disk() == -1){
+        return -1; //error
+    }
 
     return 0; //sucess
 }
