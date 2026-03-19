@@ -189,9 +189,8 @@ extern void render_test();
 // This is called by kernel_entry.asm!
 void kernel_main(void) {
 
-
     // // Clear screen
-    vga_clear();
+    // vga_clear();
 
     //initialize serial port
     serial_init();
@@ -212,11 +211,9 @@ void kernel_main(void) {
     paging_init();
     serial_print("Paging Enabled!\n");
 
-    print_header(); // to print first shell header
+    init_salloc(); //Salloc init
 
-    //Switching to graphics mode
-    // set_mode_13h();
-    serial_print("Graphics Mode Enabled!\n");
+    print_header(); // to print first shell header
 
     // testing
     for(int i=0;i<WIDTH;i++){
@@ -228,6 +225,9 @@ void kernel_main(void) {
     //Testing back buffer
     vga_draw_init();
     serial_print("Backbuffer implimentation sucessfull!\n");
+
+    //VBE initialisation
+    vbe_draw_init();
 
     //enable mouse
     mouse_init();
@@ -243,14 +243,13 @@ void kernel_main(void) {
     serial_print_number(364555678);
 
 
-    //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
+    // //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
     // disk_init();
 
-    serial_print("NICEE\n");
+    // //File system
+    // initializeDriveBitmap(); //File system Initialization
 
     setTPS(120);
-
-    // animation();
 
     // Threading testing
 
@@ -261,85 +260,14 @@ void kernel_main(void) {
     // create_thread(fn2);
 
 
-    //The read write test
-    // uint16_t test_buffer[256];
-    // uint16_t test_buffer2[256];
-    // // Fill with test data
-    // for(int i = 0; i < 256; i++) {
-    //     test_buffer[i] = i;
-    // }
-
-    // // Write to sector 100
-    // write_sector(100, test_buffer);
-
-    // // Read back
-    // read_sector(100, test_buffer2);
-
-    // // Verify
-    // for(int i = 0; i < 256; i++) {
-    //     if(test_buffer[i] != test_buffer2[i]) {
-    //         serial_print("MISMATCH!\n");
-    //     }
-    // }
-
-
-    // //File system
-    // initializeDriveBitmap(); //File system Initialization
-
-    // // Check file system Bitmap initialisation
-    // uint16_t test_buffer3[256];
-    // for(int i=1;i<1024;i++){
-    //     read_sector(i,test_buffer3);
-    //     for(int j=0;j<256;j++){
-    //         if(test_buffer3[j] != 0){
-    //             serial_print("Bitmap Not initialized correctly!\n");
-    //             serial_print("At sector: ");
-    //             serial_print_number(i);
-    //         }
-    //     }
-    // }
-
-    // //Check Bitmap functionalities
-    // set_sector_inUse(10000);
-    // set_sector_inUse(10001);
-
-    // int b = check_sector_usage(10000);
-
-    // if(b==1){
-    //         serial_print("sector in use!\n");
-    //     }else if(b == 0){
-    //         serial_print("Sector is free\n");
-    // }
-
-
-    // set_sector_free(10001);
-    // int c = check_sector_usage(10001);
-
-    // if(c==1){
-    //         serial_print("sector in use!\n");
-    //     }else if(c == 0){
-    //         serial_print("Sector is free\n");
-    // }
-
-
-    init_salloc(); //Salloc init
-    uint32_t * debug_int = salloc(4,5);
-    
-
-    uint32_t * debug_int_2 = salloc(4,5);
-    // sfree(debug_int_2,4,5);
-
-    sfree(debug_int,4,5);
-
-    uint32_t * debug_int_3 = salloc(4,5);
-    sfree(debug_int_3,4,5);
-
-    for(int i=0;i<5000;i++){
-        salloc(4,5);
+    for(int i=0;i<1280;i++){
+        for(int j=0;j<720;j++){
+            vbe_write_pixel_BackBuffer(i,j,0xEE,0xAB,0xFF);
+        }
     }
 
-    set_mode_13h();
-    render_test();
+    vbe_flipBuffer();
+
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)

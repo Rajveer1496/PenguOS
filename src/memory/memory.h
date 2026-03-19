@@ -4,6 +4,9 @@
 //pmm.c
 extern void * alloc_page();
 extern void free_page(void *address);
+extern void set_page_inUse(uint32_t pagenum);
+extern void set_page_free(uint32_t pagenum);
+extern int check_page_usage(uint32_t pagenum);
 
 //paging.c
 void* alloc_continous_pages(uint32_t count);

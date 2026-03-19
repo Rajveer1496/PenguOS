@@ -85,6 +85,14 @@ bits 16
     add esp,6 ;cleanup
 %endmacro
 
+%macro PRINT_HEX_32 3
+    push word %3
+    push word %2
+    push dword %1
+    call print_hex_32
+    add esp,8 ;cleanup
+%endmacro
+
 %macro GET_VESA_MODE_INFO 1
     push dword %1
     call get_vesa_mode_info
@@ -98,6 +106,12 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
 
     call vga_clear
 
+; NOTE:
+; VBE Adress at = 0x500
+; Width at = 0x505
+; Height at = 0x507
+; Bitsper pixel at = 0x509
+
 .print_vesa_mode_resolution: ; Note: Height and width are 16 bit numbers
 
     call get_vesa_info
@@ -109,6 +123,7 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
     PRINT_STRING msg_MODE,0,2,4
     PRINT_STRING msg_RESOLUTION,6,2,10
     PRINT_STRING msg_BITS,19,2,14
+    PRINT_STRING msg_LFB_ADDRESS,34,2,11
 
     mov cx,66
     mov eax,3 ; y pos
@@ -126,6 +141,7 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
         add bx,ax
         pop ax
         PRINT_HEX [bx],0,ax
+        mov [0x550],bx ;preserve Mode at safe address
         pop bx
 
         PRINT_HEX [vbe_mode_structure.Width],6,ax ;Resolution width
@@ -133,18 +149,58 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
         PRINT_STRING msg_cross,11,eax,1
 
         PRINT_HEX [vbe_mode_structure.Height],13,ax ;Resolution Height
-
                 
         xor bx,bx
         mov bl,[vbe_mode_structure.BitsPerPixel]
         PRINT_HEX bx,24,ax ;Bits per pixel
 
-        inc eax
-        inc cx
-        cmp cx,88
-        jne .print_all_modes
+        PRINT_HEX_32 [vbe_mode_structure.LFBAddress],34,ax
+        
+        ;get desried mode
+        push eax
+        mov ax,[vbe_mode_structure.Width]
+        cmp ax,0x500 ;width
+        jne .next_mode
 
-    call set_vesa_mode
+        mov ax,[vbe_mode_structure.Height]
+        cmp ax,0x2D0 ;Height
+        jne .next_mode
+
+        mov al,[vbe_mode_structure.BitsPerPixel]
+        cmp al,0x18 ;Bits per pixel
+        jne .next_mode
+
+        mov eax, [vbe_mode_structure.LFBAddress]
+        mov [0x500], eax ;Save VBE address
+
+        mov ax,[vbe_mode_structure.Width]
+        mov [0x505], ax ;Save Width
+
+        mov ax,[vbe_mode_structure.Height]
+        mov [0x507], ax ;save Height
+
+        mov al,[vbe_mode_structure.BitsPerPixel]
+        mov [0x509], al ;save Bits per pixel
+
+        PRINT_HEX_32 [0x500],50,2
+
+        PRINT_HEX [0x550],50,4
+
+        mov bx,[0x550]
+        push word [bx]
+        call set_vesa_mode
+        add esp,2 ;clean
+        
+        jmp loadGDT
+
+
+        .next_mode:
+            pop eax
+            inc eax
+            inc cx
+            cmp cx,88
+            jne .print_all_modes
+
 
 jmp done
 
@@ -153,6 +209,7 @@ msg_MODE db "MODE",0
 msg_RESOLUTION db "RESOLUTION",0
 msg_BITS db "BITS_PER_PIXEL",0
 msg_MAX_COLORS db "MAXIMUM_COLORS",0
+msg_LFB_ADDRESS db "LFB_ADDRESS",0
 
 get_vesa_info:
     pushad
@@ -198,12 +255,13 @@ get_vesa_mode_info:
     popad
 ret
 
+; 1st para= Mode number (16 bits)
 set_vesa_mode:
     pushad
 
     mov ax,0x4F02
     ;0x18E mode -> 1280x720x24
-    mov bx,0x18E ;bits 0-13 mode number, bit 14 (LFB) enables linear frame buffer, bit 15 (DM) to clear screen
+    mov bx,[esp+34] ;bits 0-13 mode number, bit 14 (LFB) enables linear frame buffer, bit 15 (DM) to clear screen
     or bx,0x4000 ;enable LFB
     mov di,0
     int 0x10
@@ -226,6 +284,7 @@ err_msg db "ERROR: CANT GET VBE MODES!",0
 
 message db "VBE MODES:",0
 
+loadGDT:
 ;-------------------------------------- Jump to protected Mode ---------------------------------
 lgdt [gdt_descriptor] ;LOAD GDT
 
@@ -387,6 +446,53 @@ print_hex_simple:
     mov cx, 4
     .loop:
         rol ax, 4
+        mov bx, ax
+        and bx, 0x0F
+
+        cmp bx, 9
+        jg .letter
+        add bx, '0'
+        jmp .write
+    .letter:
+        add bx, 'A' - 10
+    .write:
+        mov [es:di], bl ; Address: es * 0x10 + di = 0xB8000 + 0
+        mov byte [es:di+1], 0x0F
+        add di, 2
+
+    dec cx
+    jnz .loop
+        
+    popad
+ret
+
+; 3rd para = posY
+; 2nd para = posX
+; 1st para = Value to print
+print_hex_32:
+    pushad ; Push EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
+
+    mov bx, 0xB800
+    mov es, bx ;es = 0xB800
+    .getPos: 
+        xor di, di ;offset
+        mov ax,[VGA_WIDTH]
+        mov bx,[esp+40] ; Y pos
+        mul bx
+        mov bx,[esp+38] ; X pos
+        add ax,bx
+
+        xor bx,bx
+        mov bx,0x2
+        mul bx
+        
+        mov di,ax ;final offset
+
+
+    mov eax, [esp+34] ;value to print
+    mov cx, 8
+    .loop:
+        rol eax, 4
         mov bx, ax
         and bx, 0x0F
 

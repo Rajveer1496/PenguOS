@@ -26,4 +26,10 @@ void vga_flipBuffer();
 void write_pixel_BackBuffer(int x, int y, uint8_t color);
 void write_pixel(int x, int y, uint8_t color);
 
+//VBE draw
+void vbe_draw_init();
+void vbe_flipBuffer();
+void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t BLUE);
+void vbe_clear_backBuffer();
+
 #endif
