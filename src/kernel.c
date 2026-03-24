@@ -68,6 +68,9 @@ extern void pic_unmask(uint32_t irqNo);
 extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 
+//FPU
+extern void checkFPU();
+
 
 // Helper function to write a character to VGA at position (x, y)
 void vga_putchar(int x, int y, char c, unsigned char color) {
@@ -267,6 +270,8 @@ void kernel_main(void) {
     }
 
     vbe_flipBuffer();
+
+    checkFPU();
 
 
     serial_print("Kernel END\n");

@@ -64,7 +64,7 @@ section .text
 
 bits 16
 ; NOTE: Make sure to put real mode code inside bits 16 directive
-; Word in 16 bit mode is of 16 bits (2 bytes)
+; Word is always of 16 bits (2 bytes)
 
 ;------------------------------------------------ 16 bits -----------------------------------------
 

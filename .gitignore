@@ -10,3 +10,4 @@ src/disk.img
 *.elf
 *.img
 *.lst
+*.bak

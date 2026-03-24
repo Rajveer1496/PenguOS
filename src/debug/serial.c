@@ -76,3 +76,12 @@ void serial_print_number(uint32_t number){ //supports at max 9 digits due to int
     serial_write_char('\r');
     serial_write_char('\n');
 }
+
+int auto_debug_counter = 1;
+
+void serial_auto_debug(){
+    serial_print("[DEBUG]: At ");
+    serial_print_number(auto_debug_counter);
+    auto_debug_counter++;
+    return;
+}
