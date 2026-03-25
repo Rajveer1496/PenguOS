@@ -69,6 +69,8 @@ void serial_print_number(uint32_t number){ //supports at max 9 digits due to int
         b = (number % i);
         buffer[j] = (char)(c+48);
     }while((number % i)!= number);
+
+    if(buffer[j] == '0') j--; //clear preceding 0
  
     for(;j>=0;j--){
         serial_write_char(buffer[j]);
@@ -84,4 +86,82 @@ void serial_auto_debug(){
     serial_print_number(auto_debug_counter);
     auto_debug_counter++;
     return;
+}
+
+void serial_print_number_noNewline(uint32_t number){ //supports at max 9 digits due to int limits (the int i)
+    char buffer[100];
+    int j=0;
+    int c;
+    uint32_t i=10;
+    int b = (number % i);
+    buffer[j] = (char)(b+48);
+    do{
+        j++;
+        i = i*10;
+        c = ((number % i) - b)/(i/10);
+        b = (number % i);
+        buffer[j] = (char)(c+48);
+    }while((number % i)!= number);
+
+    if(buffer[j] == '0') j--; //clear preceding 0
+
+    for(;j>=0;j--){
+        serial_write_char(buffer[j]);
+    }
+}
+
+
+/*
+| 1 bit  |  8 bits  |      23 bits        |
+|  Sign  | Exponent |      Mantissa       |
+*/
+
+void serial_print_float(float number,int precision){
+
+    uint32_t all_bits = *(uint32_t *)&number; //get the bits from that memory address where float is
+
+    int Exponent_127 = (all_bits >> 23) & 0xFF; //exponent with base 127
+    uint8_t sign = (all_bits >> 31) & 0x1;
+    uint32_t Mentissa = all_bits & 0x007FFFFF;
+
+    //SPECIAL CASES
+    switch(Exponent_127){
+        case 0:
+            if(Mentissa == 0)
+                serial_print_number(0);
+            else{
+                //TODO
+                serial_print("[Print Float]: Denormalized number, very samll number close to zero\n");
+            }
+            return;
+
+        case 255:
+            if(Mentissa == 0)
+                serial_print((sign == 0)?"+infinity\n":"-infinity\n");
+            else
+                serial_print("NaN\n");
+            return;
+
+        default:
+            break;
+    }
+
+    serial_print((sign == 0)?" ":"-"); //print the sign
+
+    if(sign!=0) number *= -1;
+
+    int int_num = (int)number;
+    serial_print_number_noNewline(int_num);
+    serial_print(".");
+    float float_num = (float)int_num;
+    number -= float_num;
+
+    for(int i=0;i<precision;i++){
+        number *= 10.0;
+        int_num = (int)number;
+        serial_print_number_noNewline(int_num);
+        float_num = (float)int_num;
+        number -= float_num;
+    }
+    serial_print("\n");
 }

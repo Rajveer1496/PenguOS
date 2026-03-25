@@ -69,7 +69,7 @@ extern uint8_t inb(uint16_t port); //to read data from port (in io.asm)
 extern void outb(uint16_t port, uint8_t value); // to write data to a port
 
 //FPU
-extern void checkFPU();
+extern void initFPU();
 
 
 // Helper function to write a character to VGA at position (x, y)
@@ -242,9 +242,7 @@ void kernel_main(void) {
     enable_interrupts();
     serial_print("Interrupts Enabled!\n");
 
-    serial_print_number(36);
-    serial_print_number(364555678);
-
+    initFPU(); //Enable FPU
 
     // //Start the disk (MUST BE AFTER ENABLING INTERRUPTS)
     // disk_init();
@@ -271,11 +269,22 @@ void kernel_main(void) {
 
     vbe_flipBuffer();
 
-    checkFPU();
+    //CHECK FPU
+    float f1 = 1.5;
+    float f2 = 2.0;
+    float f3 = f1*f2;
 
+    if(f3 == 3.00)
+        serial_print("[FPU] Woking Properly\n");
+    else
+        serial_print("[FPU] Not working Properly\n");
+
+    float f4 = -6.12356789;
+    serial_print_float(f4,8);
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)
+
     while (1) {
         __asm__ volatile("hlt");  // Halt until next interrupt
     }

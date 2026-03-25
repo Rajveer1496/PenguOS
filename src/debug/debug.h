@@ -4,7 +4,9 @@
 //serial.c
 void serial_print(const char* str);
 extern void serial_print_number(uint32_t number);
+void serial_print_number_noNewline(uint32_t number);
 void serial_auto_debug();
+void serial_print_float(float number,int precision);
 
 //kernel.c
 void vga_print_hex(int x, int y, uint32_t value);
