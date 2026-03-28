@@ -4,7 +4,7 @@
 #include "drivers.h"
 #include "debug.h"
 
-#define D3_line(x1,y1,z1,x2,y2,z2) draw_line(((x1)/(z1))+160,((y1)/(z1))+100,((x2)/(z2))+160,((y2)/(z2))+100)
+#define D3_line(x1,y1,z1,x2,y2,z2) vbe_draw_line(((x1)/(z1))+160,((y1)/(z1))+100,((x2)/(z2))+160,((y2)/(z2))+100,10)
 #define mod(x) ((x)<0) ? ((-1)*(x)):(x) // |x|
 #define p(h) plot(cube->x##h,cube->y##h,cube->z##h)
 #define connect(h,k) D3_line(cube->x##h,cube->y##h,cube->z##h,cube->x##k,cube->y##k,cube->z##k)
@@ -27,7 +27,7 @@ struct cube{
 };
 
 void plot(int x,int y,int z){
-    write_pixel_BackBuffer(((x)/(z))+160,((y)/(z))+100, 0x0E);
+    vbe_write_pixel_BackBuffer(((x)/(z))+160,((y)/(z))+100, 255,0,0);
     return;
 }
 
@@ -214,26 +214,26 @@ void cube_rotate(){
 
 void render_test(){    
 
-    vga_clear_backBuffer();
+    vbe_clear_backBuffer();
 
     struct cube * cube = create_cube(25,25,2,100,1);
 
     uint32_t last_frame = 0;
     setTPS(120);
-    uint16_t FPS=10; //Animation is drawing "FPS" frames every second
+    uint16_t FPS=60; //Animation is drawing "FPS" frames every second
     int x = 150;
     int y = x;
     
     while(1){
         //temp
         if(timer >= last_frame + (current_tps/FPS)){ 
-            vga_clear_backBuffer();
+            vbe_clear_backBuffer();
 
             draw_cube(cube);
 
-            cube_move(-5,-3,0,cube);
+            cube_move(1,1,0,cube);
 
-            vga_flipBuffer();
+            vbe_flipBuffer();
             last_frame = timer;
         } 
     }

@@ -261,11 +261,14 @@ void kernel_main(void) {
     // create_thread(fn2);
 
 
-    for(int i=0;i<1280;i++){
-        for(int j=0;j<720;j++){
-            vbe_write_pixel_BackBuffer(i,j,0xEE,0xAB,0xFF);
-        }
-    }
+    // for(int i=0;i<1280;i++){
+    //     for(int j=0;j<720;j++){
+    //         vbe_write_pixel_BackBuffer(i,j,0xEE,0xAB,0xFF);
+    //     }
+    // }
+
+    vbe_draw_line(1280,0,0,720,0);
+    vbe_draw_line(0,0,1280,720,0);
 
     vbe_flipBuffer();
 
@@ -281,6 +284,9 @@ void kernel_main(void) {
 
     float f4 = -6.12356789;
     serial_print_float(f4,8);
+
+    //render test
+    render_test();
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)

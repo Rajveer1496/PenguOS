@@ -3,6 +3,9 @@
 #include "memory.h"
 #include "debug.h"
 
+#define floor(y) ((int)y)
+#define intensity(x) ((int)((x)*(255)))
+
 uint32_t * VBE_MEMORY;
 uint8_t * vbe_screenBuffer;
 uint8_t *vbe_backBuffer;
@@ -65,4 +68,40 @@ void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t
 void vbe_clear_backBuffer(){
     memInit_fast(vbe_backBuffer,vbe_buffer_size_bytes);
     return;
+}
+
+// Shape Draw functions
+
+void vbe_draw_line(int x1, int y1,int x2,int y2, int thickness_px){
+    if(x2<x1){ // so we always go from left to right, in any quadrant
+        int temp = x1;
+        x1 = x2;
+        x2 = temp;
+
+        temp = y1;
+        y1 = y2;
+        y2 = temp;
+    }
+    
+    float gradient = ((float)(y2-y1)/(float)(x2-x1));
+
+    int step_y = (y2>y1) ? 1:(-1); 
+
+    if(gradient>1 || gradient <-1){ //slope steeper than 45 degree
+        for(int i = y1; i!=y2; i+=step_y){
+            float x_pos = ((i-y1)/gradient) + x1;
+            float frac = x_pos - (int)x_pos;
+
+            vbe_write_pixel_BackBuffer(floor(x_pos),i,intensity(1-frac),intensity(1-frac),intensity(1-frac));
+            vbe_write_pixel_BackBuffer(floor(x_pos)+1,i,intensity(frac),intensity(frac),intensity(frac));
+        }
+    }else{//step along side x
+        for(int i = x1; i!=x2; i++){
+            float y_pos = (gradient*(i - x1)) + y1;
+            float frac = y_pos - (int)y_pos;
+
+            vbe_write_pixel_BackBuffer(i,floor(y_pos),intensity(1-frac),intensity(1-frac),intensity(1-frac));
+            vbe_write_pixel_BackBuffer(i,floor(y_pos)+1,intensity(frac),intensity(frac),intensity(frac));
+        }
+    }
 }

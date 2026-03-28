@@ -31,5 +31,6 @@ void vbe_draw_init();
 void vbe_flipBuffer();
 void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 void vbe_clear_backBuffer();
+void vbe_draw_line(int x1, int y1,int x2,int y2, int thickness_px);
 
 #endif
