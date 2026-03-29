@@ -11,3 +11,4 @@ src/disk.img
 *.img
 *.lst
 *.bak
+/src/3D/asset
