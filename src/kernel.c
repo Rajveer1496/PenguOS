@@ -8,6 +8,7 @@
 #include "threading.h"
 #include "graphics.h"
 #include "memory.h"
+#include "strings.h"
 
 void break_ppp(){ //debug
     return;
@@ -284,6 +285,16 @@ void kernel_main(void) {
 
     float f4 = -6.12356789;
     serial_print_float(f4,8);
+
+    //string test
+    int test2 = stringToInt("12345678");
+
+    serial_print_number(test2);
+
+    test2 = stringToInt("-4");
+    if(test2 == -4){
+        serial_print("-4\n");
+    }
 
     //render test
     render_test();

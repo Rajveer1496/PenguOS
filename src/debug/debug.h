@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <stdint.h>
+
 //serial.c
 void serial_print(const char* str);
 extern void serial_print_number(uint32_t number);
