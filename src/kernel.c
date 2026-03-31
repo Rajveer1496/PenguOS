@@ -296,6 +296,9 @@ void kernel_main(void) {
         serial_print("-4\n");
     }
 
+    float test3 = stringToFloat("-123.45678");
+    serial_print_float(test3,5);
+
     //render test
     render_test();
 

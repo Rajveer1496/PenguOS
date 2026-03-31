@@ -10,3 +10,16 @@ int pow(int number,int power){ //positive powers only
 
     return number;
 }
+
+float pow_f(float number,int power){
+    float temp = number;
+    if(power == 0) return 1;
+
+    if(power == 1) return number;
+
+    for(int i=1;i<power;i++){
+        number *= temp;
+    }
+
+    return number;
+}

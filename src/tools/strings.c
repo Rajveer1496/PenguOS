@@ -10,13 +10,6 @@ int strlength(char * char_buffer){
     return length;
 }
 
-float stringToFloat(char * char_buffer){
-    //TODO
-    int string_len = strlength(char_buffer);
-    
-    return 0.00;
-}
-
 int stringToInt(char * char_buffer){
 
     int string_len = strlength(char_buffer);
@@ -37,4 +30,27 @@ int stringToInt(char * char_buffer){
         return number;
     }
     return -1;
+}
+
+float stringToFloat(char * char_buffer){
+    char * after_dot;
+    char before_dot[20];
+    for(int i=0; char_buffer[i] != '\0' && i<100; i++){ //seperating float into two parts
+        if(char_buffer[i] == '.'){
+            after_dot = &char_buffer[i+1];
+            for(int j=0;j<i;j++){
+                before_dot[j] = char_buffer[j];
+            }
+            before_dot[i] = '\0';
+        }
+    }
+    int len_after_dot = strlength(after_dot);
+
+    float number_before_dot = (float)stringToInt(before_dot);
+
+    float number_after_dot = ((float)stringToInt(after_dot))*pow_f(0.1,len_after_dot);
+
+    if(char_buffer[0] == '-') number_after_dot*=(-1);
+    
+    return number_before_dot + number_after_dot;
 }
