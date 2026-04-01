@@ -35,7 +35,7 @@ int stringToInt(char * char_buffer){
 float stringToFloat(char * char_buffer){
     char * after_dot;
     char before_dot[20];
-    for(int i=0; char_buffer[i] != '\0' && i<100; i++){ //seperating float into two parts
+    for(int i=0; char_buffer[i] != '\0' && i<20; i++){ //seperating float into two parts
         if(char_buffer[i] == '.'){
             after_dot = &char_buffer[i+1];
             for(int j=0;j<i;j++){
@@ -51,6 +51,7 @@ float stringToFloat(char * char_buffer){
     float number_after_dot = ((float)stringToInt(after_dot))*pow_f(0.1,len_after_dot);
 
     if(char_buffer[0] == '-') number_after_dot*=(-1);
+    // Negative before dot part automatically handled by stringToInt()
     
     return number_before_dot + number_after_dot;
 }

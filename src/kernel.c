@@ -9,6 +9,7 @@
 #include "graphics.h"
 #include "memory.h"
 #include "strings.h"
+#include "T3D.h"
 
 void break_ppp(){ //debug
     return;
@@ -22,6 +23,8 @@ void break_ppp(){ //debug
 // VGA color codes
 #define COLOR_BLACK 0
 #define COLOR_WHITE 15
+
+#define NEW_LINE serial_print("\n");
 
 // External functions from other files
 extern void idt_init(void);
@@ -290,17 +293,56 @@ void kernel_main(void) {
     int test2 = stringToInt("12345678");
 
     serial_print_number(test2);
+    NEW_LINE
 
     test2 = stringToInt("-4");
     if(test2 == -4){
         serial_print("-4\n");
     }
 
-    float test3 = stringToFloat("-123.45678");
+    float test3 = stringToFloat("-0.45678");
     serial_print_float(test3,5);
+    NEW_LINE
+
+    extern uint32_t _binary_3D_asset_ball_obj_start;
+    char * obj_source = (char *)&_binary_3D_asset_ball_obj_start;
+
+    struct obj ball;
+    
+    ObjInit(obj_source,&ball);
+
+    obj_store(obj_source,&ball);
+
+    serial_print_number(ball.no_vertex/3);
+    NEW_LINE
+    serial_print_number(ball.no_face/4);
+    NEW_LINE
+
+    serial_print("v ");
+    for(int i=1;i<ball.no_vertex;i++){
+        serial_print_float(ball.vertex_buffer[i],6);
+        serial_print(" ");
+        if(i%3 == 0 && i!=0) {
+            serial_print("\n");
+            serial_print("v ");
+        }
+    }
+
+    serial_print("\n");
+
+    serial_print("f ");
+    for(int i=1;i<ball.no_face;i++){
+        serial_print_number(ball.face_buffer[i]);
+        serial_print(" ");
+        if(i%4 == 0 && i!=0) {
+            serial_print("\n");
+            serial_print("f ");
+        }
+    }
+
 
     //render test
-    render_test();
+    // render_test();
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)

@@ -29,12 +29,15 @@ PADDED_KERNEL_SIZE_BIN = padded_kernel_size.bin
 PADDING_FILE_BIN = paddingFile.bin
 KERNEL_SIZE_BIN = kernel_size.bin
 
+# .obj files
+3D_OBJ_BIN = ball.o
+
 #All c and asm files
 C_SOURCES = $(shell find . -name '*.c')
 ASM_SOURCES = $(shell find . -name '*.asm' ! -path './boot/*') # Dont link the bootloader, it has to be seperate
 
 #changing .c from c files to .o (OBJECT FILES)
-OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) 
+OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) $(3D_OBJ_BIN)
 
 # Default target - build everything
 all: $(BOOTLOADER_IMG)
@@ -42,7 +45,7 @@ all: $(BOOTLOADER_IMG)
 # Build the ISO image (bootable CD)
 # Combine into bootable image
 $(BOOTLOADER_IMG): $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN) $(PADDED_KERNEL_SIZE_BIN)
-	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(PADDED_KERNEL_SIZE_BIN) $(KERNEL_BIN) > $@
+	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(PADDED_KERNEL_SIZE_BIN) $(KERNEL_BIN)  > $@
 
 #create padded kernel size sector
 
@@ -66,6 +69,9 @@ $(KERNEL_BIN): kernel.elf
 
 #VPATH (tells make to look where for source files)
 VPATH = memory:debug:graphics:drivers:file_system
+
+$(3D_OBJ_BIN): 3D/asset/ball.obj
+	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_OBJ_BIN)
 
 # Build bootloader binaries
 $(BOOT_1_BIN): boot/boot_1.asm

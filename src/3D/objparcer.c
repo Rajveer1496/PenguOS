@@ -1,20 +1,16 @@
 // TO read and store .obj data
 
+//TODO: Map index perfectly so we can find the vertex needed by faces
+
 #include <stdint.h>
 #include "memory.h"
 #include "strings.h"
+#include "T3D.h"
 
-struct obj{
-    int no_vertex;
-    float * vertex_buffer;
-
-    int no_face;
-    int * face_buffer;
-};
 
 void ObjInit(char * source,struct obj* destination){//get obj size in bytes and allocate space
-    destination->no_face=0;
-    destination->no_vertex=0;
+    destination->no_face=1;
+    destination->no_vertex=1;
 
     int vertex_no_floats= 0; //Net number of floats of all vertex
     int face_no_int = 0; //Net number of int of all faces
@@ -99,6 +95,7 @@ void obj_store(char * source,struct obj* destination){
 
         if(source[i] == 'f'){
             //traverse whole line
+            int face_per_line=0;
             for(int j=1;(source[i+j] != '\n') && (j<100); j++){ // j<100 for infinite loop safety
                 if(source[i+j] == ' '){
                     j++;
@@ -113,12 +110,15 @@ void obj_store(char * source,struct obj* destination){
                     int face_int = stringToInt(char_buffer);
                     destination->face_buffer[destination->no_face] = face_int;
                     destination->no_face++;
+                    face_per_line++;
                 }
                 
             }
             //some faces are made of 3 vertex and some are from 4. so appending 0 where each face ends in buffer
-            destination->face_buffer[destination->no_face] = 0;
-            destination->no_face++;
+            if(face_per_line==3){
+                destination->face_buffer[destination->no_face] = 0;
+                destination->no_face++;
+            }
         }
     }
 }
