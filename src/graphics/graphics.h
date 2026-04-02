@@ -1,6 +1,8 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <stdint.h>
+
 struct image {
     uint8_t* img;
     int screen_x;

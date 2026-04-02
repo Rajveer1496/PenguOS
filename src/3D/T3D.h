@@ -13,5 +13,8 @@ void ObjInit(char * source,struct obj* destination);
 void objDestroy(struct obj* obj);
 void obj_store(char * source,struct obj* destination);
 
+//Engine
+void render_obj(struct obj * obj,float x,float y,float z,float scale);
+
 
 #endif

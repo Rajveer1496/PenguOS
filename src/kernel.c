@@ -313,36 +313,11 @@ void kernel_main(void) {
 
     obj_store(obj_source,&ball);
 
-    serial_print_number(ball.no_vertex/3);
-    NEW_LINE
-    serial_print_number(ball.no_face/4);
-    NEW_LINE
-
-    serial_print("v ");
-    for(int i=1;i<ball.no_vertex;i++){
-        serial_print_float(ball.vertex_buffer[i],6);
-        serial_print(" ");
-        if(i%3 == 0 && i!=0) {
-            serial_print("\n");
-            serial_print("v ");
-        }
-    }
-
-    serial_print("\n");
-
-    serial_print("f ");
-    for(int i=1;i<ball.no_face;i++){
-        serial_print_number(ball.face_buffer[i]);
-        serial_print(" ");
-        if(i%4 == 0 && i!=0) {
-            serial_print("\n");
-            serial_print("f ");
-        }
-    }
-
-
     //render test
     // render_test();
+
+    vbe_clear_backBuffer();
+    render_obj(&ball,200,200,1,100);
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)
