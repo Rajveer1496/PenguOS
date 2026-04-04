@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define NEW_LINE serial_print("\n");
+
 //serial.c
 void serial_print(const char* str);
 extern void serial_print_number(uint32_t number);

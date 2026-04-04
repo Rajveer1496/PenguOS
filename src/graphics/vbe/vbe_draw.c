@@ -32,11 +32,14 @@ void vbe_draw_init(){
     serial_print("VBE MODE:\n");
     serial_print("WIDTH: ");
     serial_print_number(VBE_WIDTH);
+    NEW_LINE
     serial_print("HEIGHT: ");
     serial_print_number(VBE_HEIGHT);
+    NEW_LINE
     serial_print("BYTES_PER_PIXEL: ");
     serial_print_number(VBE_BYTES_PER_PIXEL);
-
+    NEW_LINE
+    
     // SETTING VBE BUFFER IN USE IN MEMORY
     uint32_t vbe_starting_page = (uint32_t)VBE_MEMORY/4096;
     uint32_t vbe_ending_page = ((uint32_t)VBE_MEMORY+vbe_buffer_size_bytes)/4096;

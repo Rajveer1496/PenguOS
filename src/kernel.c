@@ -24,8 +24,6 @@ void break_ppp(){ //debug
 #define COLOR_BLACK 0
 #define COLOR_WHITE 15
 
-#define NEW_LINE serial_print("\n");
-
 // External functions from other files
 extern void idt_init(void);
 extern void pic_remap(void);
@@ -304,20 +302,55 @@ void kernel_main(void) {
     serial_print_float(test3,5);
     NEW_LINE
 
-    extern uint32_t _binary_3D_asset_ball_obj_start;
-    char * obj_source = (char *)&_binary_3D_asset_ball_obj_start;
-
-    struct obj ball;
     
-    ObjInit(obj_source,&ball);
+    // extern uint32_t _binary_3D_asset_ball_obj_start;
+    // char * obj_source = (char *)&_binary_3D_asset_ball_obj_start;
 
-    obj_store(obj_source,&ball);
+    // struct obj ball;
+    
+    // ObjInit(obj_source,&ball);
 
-    //render test
-    // render_test();
+    // obj_store(obj_source,&ball);
 
+    // vbe_clear_backBuffer();
+    // render_obj(&ball,0,0,250,100);
+    // vbe_flipBuffer();
+
+
+
+
+
+    extern uint32_t _binary_3D_asset_monkey_obj_start;
+    char * obj_monkey = (char *)&_binary_3D_asset_monkey_obj_start;
+
+    struct obj monkey;
+    
+    ObjInit(obj_monkey,&monkey);
+
+    obj_store(obj_monkey,&monkey);
+   
     vbe_clear_backBuffer();
-    render_obj(&ball,200,200,1,100);
+    render_obj(&monkey,0,0,250,100);
+    vbe_flipBuffer();
+
+
+
+
+
+    // extern uint32_t _binary_3D_asset_ak47_obj_start;
+    // char * obj_ak47 = (char *)&_binary_3D_asset_ak47_obj_start;
+
+    // struct obj ak47;
+    
+    // ObjInit(obj_ak47,&ak47);
+
+    // obj_store(obj_ak47,&ak47);
+
+    // vbe_clear_backBuffer();
+    // render_obj(&ak47,0,0,250,100);
+    // vbe_flipBuffer();
+
+
 
     serial_print("Kernel END\n");
     // Hang forever (interrupts will still work!)

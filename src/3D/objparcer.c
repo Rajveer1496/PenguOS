@@ -22,6 +22,7 @@ void ObjInit(char * source,struct obj* destination){//get obj size in bytes and 
                 //EOF
                 destination->vertex_buffer = (float *)alloc_continous_pages(((vertex_no_floats*4)/4096)+1);
                 destination->face_buffer = (int *)alloc_continous_pages(((face_no_int*4)/4096)+1);
+                break;
             }
         }
 
@@ -40,11 +41,8 @@ void ObjInit(char * source,struct obj* destination){//get obj size in bytes and 
         if(source[i] == 'f'){
             //traverse whole line
             for(int j=1;(source[i+j] != '\n') && (j<100); j++){ // j<100 for infinite loop safety
-                //traverse whole line
-                for(int j=1;(source[i+j] != '\n') && (j<100); j++){ // j<100 for infinite loop safety
-                    if(source[i+j] == ' '){
-                        face_no_int++;
-                    }
+                if(source[i+j] == ' '){
+                    face_no_int++;
                 }
             }
         }

@@ -82,6 +82,7 @@ int auto_debug_counter = 1;
 void serial_auto_debug(){
     serial_print("[DEBUG]: At ");
     serial_print_number(auto_debug_counter);
+    NEW_LINE
     auto_debug_counter++;
     return;
 }
