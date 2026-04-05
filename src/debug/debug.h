@@ -5,6 +5,12 @@
 
 #define NEW_LINE serial_print("\n");
 
+#define HLT \
+    serial_print("HLT!");   \
+    while (1) { \
+        __asm__ volatile("hlt");    \
+    }
+
 //serial.c
 void serial_print(const char* str);
 extern void serial_print_number(uint32_t number);

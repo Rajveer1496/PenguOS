@@ -6,26 +6,17 @@
 #include "memory.h"
 #include "strings.h"
 #include "T3D.h"
+#include "debug.h"
 
 
-void ObjInit(char * source,struct obj* destination){//get obj size in bytes and allocate space
+void ObjInit(char * source,struct obj* destination,uint32_t size_bytes){//get obj size in bytes and allocate space
     destination->no_face=1;
     destination->no_vertex=1;
 
     int vertex_no_floats= 0; //Net number of floats of all vertex
     int face_no_int = 0; //Net number of int of all faces
 
-    for(int i=0;i<100000; i++){ // NOTEEEEEEEEEE: limit to 100000 just temp for safety
-
-        if(source[i] == '\n'){
-            if((source[i+1] != 'v') && source[i+1] != 'f' && source[i+1] != 's'){
-                //EOF
-                destination->vertex_buffer = (float *)alloc_continous_pages(((vertex_no_floats*4)/4096)+1);
-                destination->face_buffer = (int *)alloc_continous_pages(((face_no_int*4)/4096)+1);
-                break;
-            }
-        }
-
+    for(int i=0;i<size_bytes; i++){
         if(source[i] == 'v'){
             if(source[i+1] != ' '){
                 continue; // ignoring vt and vn
@@ -45,8 +36,12 @@ void ObjInit(char * source,struct obj* destination){//get obj size in bytes and 
                     face_no_int++;
                 }
             }
+            face_no_int++; //for when we append exta 0 at faces with 3 vertex
         }
     }
+
+    destination->vertex_buffer = (float *)alloc_continous_pages(((vertex_no_floats*4)/4096)+1);
+    destination->face_buffer = (int *)alloc_continous_pages(((face_no_int*4)/4096)+1);
 }
 
 void objDestroy(struct obj* obj){
@@ -54,18 +49,12 @@ void objDestroy(struct obj* obj){
     free_continous_pages(obj->face_buffer,(((obj->no_face)*4)/4096)+1);
 }
 
-void obj_store(char * source,struct obj* destination){ 
+void obj_store(char * source,struct obj* destination, uint32_t size_bytes){
 
-    ObjInit(source,destination);
+    ObjInit(source,destination,size_bytes);
 
     // there should be 'v' or 'f' just after '\n' or its EOF
-    for(int i=0;i<100000 ; i++){ // NOTEEEEEEEEEE: limit to 100000 just temp for safety
-
-        if(source[i] == '\n'){
-            if((source[i+1] != 'v') && source[i+1] != 'f' && source[i+1] != 's')
-                return; //EOF
-        }
-
+    for(int i=0;i<size_bytes ; i++){
         if(source[i] == 'v'){
             if(source[i+1] != ' '){
                 continue; // ignoring vt and vn

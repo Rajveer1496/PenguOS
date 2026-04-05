@@ -39,7 +39,7 @@ C_SOURCES = $(shell find . -name '*.c')
 ASM_SOURCES = $(shell find . -name '*.asm' ! -path './boot/*') # Dont link the bootloader, it has to be seperate
 
 #changing .c from c files to .o (OBJECT FILES)
-OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) $(3D_BALL_BIN) $(3D_MONKEY_BIN)
+OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) $(3D_BALL_BIN) $(3D_MONKEY_BIN) $(3D_AK47_BIN)
 
 # Default target - build everything
 all: $(BOOTLOADER_IMG)
@@ -78,8 +78,8 @@ $(3D_BALL_BIN): 3D/asset/ball.obj
 $(3D_MONKEY_BIN): 3D/asset/monkey.obj
 	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_MONKEY_BIN)
 
-# $(3D_AK47_BIN): 3D/asset/ak47.obj
-# 	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_AK47_BIN)
+$(3D_AK47_BIN): 3D/asset/ak47.obj
+	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_AK47_BIN)
 
 # Build bootloader binaries
 $(BOOT_1_BIN): boot/boot_1.asm

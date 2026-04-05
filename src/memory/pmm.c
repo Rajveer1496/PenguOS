@@ -3,6 +3,18 @@
 
 #define maxPages 4194304 //for 16 GB RAM
 
+uint32_t obj_start_address;
+uint32_t obj_end_address;
+#define  OBJmemINuse(x) \
+    extern uint32_t _binary_3D_asset_##x##_obj_start; \
+    extern uint32_t _binary_3D_asset_##x##_obj_end; \
+    char * obj_##x = (char *)&_binary_3D_asset_##x##_obj_start; \
+    obj_start_address = (uint32_t)&_binary_3D_asset_##x##_obj_start;    \
+    obj_end_address = (uint32_t)&_binary_3D_asset_##x##_obj_end;    \
+    for(uint32_t i=(obj_start_address/4096); i < (obj_end_address/4096) + 1 ; i++){ \
+        set_page_inUse(i);  \
+    }
+
 extern uint32_t _kernel_end; //label which is at end of kernel
 uint32_t *bitmap = (uint32_t *)&_kernel_end; // start bitmap exactly where kernel ends
 
@@ -64,12 +76,19 @@ void page_init(){
         bitmap[i] = 0;
     }
 
+    OBJmemINuse(monkey)
+    OBJmemINuse(ball)
+    OBJmemINuse(ak47)
+
     //reserved pages
     uint32_t kernel_end_address = (uint32_t)&_kernel_end; //_kernel_end is a symbol, gotta convert it into adress
     uint32_t kernelEndpage = (kernel_end_address) / 4096;
     for(uint32_t i=0; i < kernelEndpage + 200 ; i++){ //can do 128 but for safety using 200
         set_page_inUse(i);
     }
+
+
+
 }
 
 void* alloc_continous_pages(uint32_t count){

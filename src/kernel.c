@@ -302,53 +302,19 @@ void kernel_main(void) {
     serial_print_float(test3,5);
     NEW_LINE
 
+    OBJ_INIT(monkey)
+    OBJ_INIT(ball)
+
+    OBJ_INIT(ak47)
+
+    // OBJ_INFO_PRINT(monkey)
+
     
-    // extern uint32_t _binary_3D_asset_ball_obj_start;
-    // char * obj_source = (char *)&_binary_3D_asset_ball_obj_start;
-
-    // struct obj ball;
-    
-    // ObjInit(obj_source,&ball);
-
-    // obj_store(obj_source,&ball);
-
-    // vbe_clear_backBuffer();
-    // render_obj(&ball,0,0,250,100);
-    // vbe_flipBuffer();
-
-
-
-
-
-    extern uint32_t _binary_3D_asset_monkey_obj_start;
-    char * obj_monkey = (char *)&_binary_3D_asset_monkey_obj_start;
-
-    struct obj monkey;
-    
-    ObjInit(obj_monkey,&monkey);
-
-    obj_store(obj_monkey,&monkey);
-   
     vbe_clear_backBuffer();
-    render_obj(&monkey,0,0,250,100);
+    render_obj(&monkey,45,0,60,10);
+
+    render_obj(&ak47,-7,0,60,100);
     vbe_flipBuffer();
-
-
-
-
-
-    // extern uint32_t _binary_3D_asset_ak47_obj_start;
-    // char * obj_ak47 = (char *)&_binary_3D_asset_ak47_obj_start;
-
-    // struct obj ak47;
-    
-    // ObjInit(obj_ak47,&ak47);
-
-    // obj_store(obj_ak47,&ak47);
-
-    // vbe_clear_backBuffer();
-    // render_obj(&ak47,0,0,250,100);
-    // vbe_flipBuffer();
 
 
 
