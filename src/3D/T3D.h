@@ -7,7 +7,10 @@ struct obj{
     int no_vertex; //index starting from 1
     float * vertex_buffer;
 
-    int no_face; //index starting from 1
+    int no_normal; //start index from 1
+    float * normal_buffer;
+
+    int no_face; //index starting from 1 //also includs normal indexes
     int * face_buffer;
 };
 
@@ -42,13 +45,32 @@ void render_obj(struct obj * obj,float x,float y,float z,float scale);
     }   \
     NEW_LINE    \
     serial_print("f "); \
-    for(int i=1;i<x.no_face;i++){   \
+    for(int i=1;i<x.no_face;i+=12){   \
         serial_print_number(x.face_buffer[i]);  \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+1]);    \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+2]);    \
         serial_print(" ");  \
-        if(i%4 == 0 && i!=0) {  \
-            NEW_LINE \
-            serial_print("f "); \
-        }   \
+        serial_print_number(x.face_buffer[i+3]);  \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+4]);    \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+5]);    \
+        serial_print(" ");  \
+        serial_print_number(x.face_buffer[i+6]);  \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+7]);    \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+8]);    \
+        serial_print(" ");  \
+        serial_print_number(x.face_buffer[i+9]);  \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+10]);    \
+        serial_print("/");  \
+        serial_print_number(x.face_buffer[i+11]);    \
+        NEW_LINE \
+        serial_print("f "); \
     }
 
 

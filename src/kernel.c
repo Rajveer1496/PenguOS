@@ -302,19 +302,19 @@ void kernel_main(void) {
     serial_print_float(test3,5);
     NEW_LINE
 
-    OBJ_INIT(monkey)
-    OBJ_INIT(ball)
+    // OBJ_INIT(monkey)
+    // OBJ_INIT(ball)
 
-    OBJ_INIT(ak47)
+    OBJ_INIT(ak47_normal)
 
-    // OBJ_INFO_PRINT(monkey)
+    OBJ_INFO_PRINT(ak47_normal)
 
     
-    vbe_clear_backBuffer();
-    render_obj(&monkey,45,0,60,10);
+    // vbe_clear_backBuffer();
+    // render_obj(&monkey,45,0,60,10);
 
-    render_obj(&ak47,-7,0,60,100);
-    vbe_flipBuffer();
+    // render_obj(&ak47,-7,0,60,100);
+    // vbe_flipBuffer();
 
 
 

@@ -76,9 +76,10 @@ void page_init(){
         bitmap[i] = 0;
     }
 
-    OBJmemINuse(monkey)
-    OBJmemINuse(ball)
-    OBJmemINuse(ak47)
+    // OBJmemINuse(monkey)
+    // OBJmemINuse(ball)
+    // OBJmemINuse(ak47)
+    OBJmemINuse(ak47_normal)
 
     //reserved pages
     uint32_t kernel_end_address = (uint32_t)&_kernel_end; //_kernel_end is a symbol, gotta convert it into adress
