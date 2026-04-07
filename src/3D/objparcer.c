@@ -18,7 +18,7 @@ void ObjInit(char * source,struct obj* destination,uint32_t size_bytes){//get ob
     int normal_no_floats = 0;
     int face_no_int = 0; //Net number of int of all faces
 
-    for(int i=0;i<size_bytes; i++){
+    for(uint32_t i=0;i<size_bytes; i++){
         if(source[i] == 'v'){
             if(source[i+1] != ' ' && source[i+1] != 'n'){
                 continue; // ignoring vt and vn
@@ -65,7 +65,7 @@ void obj_store(char * source,struct obj* destination, uint32_t size_bytes){
     ObjInit(source,destination,size_bytes);
 
     // there should be 'v' or 'f' just after '\n' or its EOF
-    for(int i=0;i<size_bytes ; i++){
+    for(uint32_t i=0;i<size_bytes ; i++){
         if(source[i] == 'v'){
             if(source[i+1] != ' ' && source[i+1] != 'n'){
                 continue; // ignoring vt and vn
@@ -112,13 +112,14 @@ void obj_store(char * source,struct obj* destination, uint32_t size_bytes){
             }
         }
 
-        if(source[i] == 'f'){
 /*
-FORMAT:
+FACE FORMAT:
+
 vertex/UV/normal
 
 f 2139/0/74 2206/0/74 2140/0/74
 */
+        if(source[i] == 'f'){
             //traverse whole line
             int face_per_line=0;
             for(int j=1;(source[i+j] != '\n') && (j<100); j++){ // j<100 for infinite loop safety

@@ -307,14 +307,14 @@ void kernel_main(void) {
 
     OBJ_INIT(ak47_normal)
 
-    OBJ_INFO_PRINT(ak47_normal)
+    // OBJ_INFO_PRINT(ak47_normal)
 
     
-    // vbe_clear_backBuffer();
+    vbe_clear_backBuffer();
     // render_obj(&monkey,45,0,60,10);
 
-    // render_obj(&ak47,-7,0,60,100);
-    // vbe_flipBuffer();
+    render_obj(&ak47_normal,-7,0,60,100);
+    vbe_flipBuffer();
 
 
 

@@ -37,7 +37,7 @@ int new_big_page(){ //to get new big page
 
 void * salloc(uint32_t bytes,uint32_t multiplier){ //NOTE: WATCH BOUNDARIES
     start:
-    for(int i=1;i<=counter_big_page;i++){
+    for(uint32_t i=1;i<=counter_big_page;i++){
         uint32_t * temp_ptr_big_page = bigmap[i];
 
         //first 128 bytes are bit map
@@ -86,9 +86,9 @@ int sfree(void * address, uint32_t bytes,uint32_t multiplier){
 
 // NOTE: Here Base_Address + 1024 will give whole 4KB range cuz pointer is of 32 bit (4 bytes)
 
-for(int i=1; i<=counter_big_page;i++){
+for(uint32_t i=1; i<=counter_big_page;i++){
     uint32_t * temp_ptr_big_page = bigmap[i];
-    if((address >= bigmap[i]) && (address <= (bigmap[i] + 1024 ))){ //in the range of current BIG page
+    if((address >= (void *)bigmap[i]) && (address <= (void *)(bigmap[i] + 1024 ))){ //in the range of current BIG page
         uint32_t sector_no = ((uint32_t)address - (uint32_t)bigmap[i])/4;
         int sector_needed = (bytes*multiplier)/4;
 
