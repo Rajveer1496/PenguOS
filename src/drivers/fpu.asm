@@ -46,3 +46,19 @@ FPU_PRESENT db "[FPU]: FPU IS PRESENT",0
 FPU_NOT_PRESENT db "[FPU]: FPU NOT PRESENT!",0
 NEW_LINE db 10,0
 FPU_ENABLED db "[FPU]: ENABLED!",0
+
+; 3rd = pointer to cos
+; 2nd = pointer to sin
+; 1st parameter = angle (radians)
+global sincos
+sincos:
+    fld dword [esp+4] ;angle
+    fsincos
+    push eax
+    mov eax,[esp+16] ;cos
+    fstp dword [eax]
+    mov eax,[esp+12] ;sin
+    fstp dword [eax]
+    pop eax
+    ret
+

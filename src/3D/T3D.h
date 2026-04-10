@@ -26,7 +26,7 @@ void objDestroy(struct obj* obj);
 void obj_store(char * source,struct obj* destination, uint32_t size_bytes);
 
 //Engine
-void render_obj(struct obj * obj,float x,float y,float z,float scale);
+void render_obj(struct obj * obj,float camera_x,float camera_y,float camera_z,float scale,float x_rot_angle,float y_rot_angle,float z_rot_angle);
 
 
 #define OBJ_INFO_PRINT(x) \

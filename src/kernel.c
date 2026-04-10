@@ -10,6 +10,7 @@
 #include "memory.h"
 #include "strings.h"
 #include "T3D.h"
+#include "maths.h"
 
 void break_ppp(){ //debug
     return;
@@ -306,14 +307,18 @@ void kernel_main(void) {
     // OBJ_INIT(ball)
 
     OBJ_INIT(ak47_normal)
+    // OBJ_INIT(ship)
 
     // OBJ_INFO_PRINT(ak47_normal)
+    // OBJ_INFO_PRINT(ship)
 
     
     vbe_clear_backBuffer();
+    vbe_flipBuffer();
     // render_obj(&monkey,45,0,60,10);
 
-    render_obj(&ak47_normal,-7,0,60,100);
+    render_obj(&ak47_normal,-7,0,60,100,0,0,(PI)/2);
+    // render_obj(&ship,50,50,1000,1);
     vbe_flipBuffer();
 
 

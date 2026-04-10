@@ -34,13 +34,14 @@ KERNEL_SIZE_BIN = kernel_size.bin
 3D_MONKEY_BIN = monkey.o
 3D_AK47_BIN = ak47.o
 3D_AK47NORMAL_BIN = ak47_normal.o
+3D_SHIP_BIN = ship.o
 
 #All c and asm files
 C_SOURCES = $(shell find . -name '*.c')
 ASM_SOURCES = $(shell find . -name '*.asm' ! -path './boot/*') # Dont link the bootloader, it has to be seperate
 
 #changing .c from c files to .o (OBJECT FILES)
-OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) $(3D_AK47NORMAL_BIN)
+OBJS = $(patsubst %.c,%.o,$(C_SOURCES)) $(patsubst %.asm,%.o,$(ASM_SOURCES)) $(3D_AK47NORMAL_BIN) $(3D_SHIP_BIN)
 
 # Default target - build everything
 all: $(BOOTLOADER_IMG)
@@ -84,6 +85,9 @@ VPATH = memory:debug:graphics:drivers:file_system
 
 $(3D_AK47NORMAL_BIN): 3D/asset/ak47_normal.obj
 	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_AK47NORMAL_BIN)
+
+$(3D_SHIP_BIN): 3D/asset/ship.obj
+	objcopy -I binary -O elf32-i386 -B i386 $< $(3D_SHIP_BIN)
 
 # Build bootloader binaries
 $(BOOT_1_BIN): boot/boot_1.asm

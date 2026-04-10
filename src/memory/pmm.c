@@ -79,6 +79,7 @@ void page_init(){
     // OBJmemINuse(ball)
     // OBJmemINuse(ak47)
     OBJmemINuse(ak47_normal)
+    // OBJmemINuse(ship)
 
     //reserved pages
     uint32_t kernel_end_address = (uint32_t)&_kernel_end; //_kernel_end is a symbol, gotta convert it into adress
