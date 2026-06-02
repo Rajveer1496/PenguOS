@@ -1,6 +1,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#define ADDRESSING_BYTES 4
+
 //pmm.c
 extern void * alloc_page();
 extern void free_page(void *address);

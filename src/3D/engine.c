@@ -19,8 +19,6 @@ void render_obj(struct obj * obj,float camera_x,float camera_y,float camera_z,fl
 
     float focal_length = VBE_WIDTH/2;
 
-    serial_auto_debug();
-
     // Rotation
     float sin_X;
     float cos_X;

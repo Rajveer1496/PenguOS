@@ -317,9 +317,26 @@ void kernel_main(void) {
     vbe_flipBuffer();
     // render_obj(&monkey,45,0,60,10);
 
-    render_obj(&ak47_normal,-7,0,60,100,0,0,(PI)/2);
+    // render_obj(&ak47_normal,-7,0,60,100,0,0,(PI)/2);
     // render_obj(&ship,50,50,1000,1);
     vbe_flipBuffer();
+
+    uint32_t last_frame = 0;
+    float angle =0;
+    uint16_t FPS=120; //Animation is drawing "FPS" frames every second
+     while(1){
+
+    //temp
+    if(timer >= last_frame + (current_tps/FPS)){ 
+        vbe_clear_backBuffer();
+        render_obj(&ak47_normal,0,0,60,100,angle/4,angle/2,0);
+
+        angle += 0.1;
+
+        vbe_flipBuffer();
+        last_frame = timer;
+    } 
+    }
 
 
 
