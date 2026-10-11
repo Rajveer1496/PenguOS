@@ -7,12 +7,12 @@
 #include "gui.h"
 #include "graphics.h"
 
-extern void * plane_buffer_array;
+extern uint16_t VBE_WIDTH;
+extern uint16_t VBE_HEIGHT;
 
 void gui_main(){
     //draw background
-    uint8_t *plane_buffer = (uint8_t *)create_plane();
-    
+    struct plane * background = create_plane(0,0,VBE_WIDTH,VBE_HEIGHT);
 
     //draw taskbar
 
