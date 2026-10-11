@@ -168,7 +168,11 @@ set_VBE_mode: ; Refer: https://wiki.osdev.org/VESA_Video_Modes
 
         mov al,[vbe_mode_structure.BitsPerPixel]
         cmp al,0x18 ;Bits per pixel
+        je .mode_found
+        cmp al,0x20 ;32 bit also works (newer qemu dont have 24 bit 1280x720 mode)
         jne .next_mode
+
+        .mode_found:
 
         mov eax, [vbe_mode_structure.LFBAddress]
         mov [0x500], eax ;Save VBE address
@@ -545,8 +549,8 @@ protected_mode:
 
 
 ;---GET SIZE OF KERNEL--- (Number of sectors to load)
-;FFE00
-    mov edx, 0xFFE00 ;Put everything at 1MB and so on
+;0x9000 (0xFFE00 was in BIOS ROM area, newer qemu makes it read only so size was garbage)
+    mov edx, 0x9000 ;free memory right after stage 2
     mov edi, edx
     mov ebx, 0x9 ;read from sector 9
 
@@ -559,7 +563,7 @@ protected_mode:
     ;[EDI] has data
 
     ;get no of sectors
-    mov eax, [0xFFE00]        ; get the Size of kernel
+    mov eax, [0x9000]        ; get the Size of kernel
 
     cmp eax, 0x0
     xor edx, edx        ; Clear EDX (high 32 bits = 0)

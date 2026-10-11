@@ -50,6 +50,7 @@ all: $(BOOTLOADER_IMG)
 # Combine into bootable image
 $(BOOTLOADER_IMG): $(BOOT_1_BIN) $(BOOT_2_BIN) $(KERNEL_BIN) $(PADDED_KERNEL_SIZE_BIN)
 	cat $(BOOT_1_BIN) $(BOOT_2_BIN) $(PADDED_KERNEL_SIZE_BIN) $(KERNEL_BIN)  > $@
+	truncate -s %512 $@ # pad last sector, qemu ignores half sector at end of disk
 
 #create padded kernel size sector
 
