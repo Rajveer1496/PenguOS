@@ -16,6 +16,11 @@ uint8_t VBE_BITS_PER_PIXEL;
 uint8_t VBE_BYTES_PER_PIXEL;
 int vbe_buffer_size_bytes;
 
+//Draw target (where all draw functions will draw, backbuffer or any plane buffer)
+uint8_t * draw_target;
+int draw_target_width;
+int draw_target_height;
+
 void vbe_draw_init(){
     VBE_MEMORY = (uint32_t *)(*(uint32_t *)0x500);
     vbe_screenBuffer = (uint8_t *)VBE_MEMORY;
@@ -28,6 +33,7 @@ void vbe_draw_init(){
     vbe_buffer_size_bytes = (VBE_WIDTH * VBE_HEIGHT) * (VBE_BYTES_PER_PIXEL);
     int vbe_buffer_size_pages = ((vbe_buffer_size_bytes)/4096);
     vbe_backBuffer = (uint8_t *)alloc_continous_pages(vbe_buffer_size_pages);
+    vbe_reset_draw_target();
 
     serial_print("VBE MODE:\n");
     serial_print("WIDTH: ");
@@ -59,13 +65,26 @@ void vbe_flipBuffer(){
 }
 
 void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t BLUE){
-    if(x<VBE_WIDTH && y < VBE_HEIGHT && x>=0 && y>=0){
-        int index = VBE_BYTES_PER_PIXEL*((VBE_WIDTH * y) + x);
-        vbe_backBuffer[index] = RED;
-        vbe_backBuffer[index+1] = GREEN;
-        vbe_backBuffer[index+2] = BLUE;
+    if(x<draw_target_width && y < draw_target_height && x>=0 && y>=0){
+        int index = VBE_BYTES_PER_PIXEL*((draw_target_width * y) + x);
+        //VBE stores pixel as B G R (not R G B)
+        draw_target[index] = BLUE;
+        draw_target[index+1] = GREEN;
+        draw_target[index+2] = RED;
     }
     return;
+}
+
+void vbe_set_draw_target(uint8_t * buffer,int width,int height){
+    draw_target = buffer;
+    draw_target_width = width;
+    draw_target_height = height;
+}
+
+void vbe_reset_draw_target(){ //back to backbuffer
+    draw_target = vbe_backBuffer;
+    draw_target_width = VBE_WIDTH;
+    draw_target_height = VBE_HEIGHT;
 }
 
 void vbe_clear_backBuffer(){
@@ -74,6 +93,25 @@ void vbe_clear_backBuffer(){
 }
 
 // Shape Draw functions
+
+void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
+    for(int j=y;j<y+height;j++){
+        for(int i=x;i<x+width;i++){
+            vbe_write_pixel_BackBuffer(i,j,RED,GREEN,BLUE);
+        }
+    }
+}
+
+void vbe_draw_rect_hollow(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
+    for(int i=x;i<x+width;i++){
+        vbe_write_pixel_BackBuffer(i,y,RED,GREEN,BLUE);
+        vbe_write_pixel_BackBuffer(i,y+height-1,RED,GREEN,BLUE);
+    }
+    for(int j=y;j<y+height;j++){
+        vbe_write_pixel_BackBuffer(x,j,RED,GREEN,BLUE);
+        vbe_write_pixel_BackBuffer(x+width-1,j,RED,GREEN,BLUE);
+    }
+}
 
 void vbe_draw_line(int x1, int y1,int x2,int y2, int thickness_px){
     if(x2<x1){ // so we always go from left to right, in any quadrant

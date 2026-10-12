@@ -11,6 +11,7 @@
 #include "strings.h"
 #include "T3D.h"
 #include "maths.h"
+#include "gui.h"
 
 void break_ppp(){ //debug
     return;
@@ -321,22 +322,24 @@ void kernel_main(void) {
     // render_obj(&ship,50,50,1000,1);
     vbe_flipBuffer();
 
-    uint32_t last_frame = 0;
-    float angle =0;
-    uint16_t FPS=120; //Animation is drawing "FPS" frames every second
-     while(1){
+    // uint32_t last_frame = 0;
+    // float angle =0;
+    // uint16_t FPS=120; //Animation is drawing "FPS" frames every second
+    //  while(1){
 
-    //temp
-    if(timer >= last_frame + (current_tps/FPS)){ 
-        vbe_clear_backBuffer();
-        render_obj(&ak47_normal,0,0,60,100,angle/4,angle/2,0);
+    // //temp
+    // if(timer >= last_frame + (current_tps/FPS)){ 
+    //     vbe_clear_backBuffer();
+    //     render_obj(&ak47_normal,0,0,60,100,angle/4,angle/2,0);
 
-        angle += 0.1;
+    //     angle += 0.1;
 
-        vbe_flipBuffer();
-        last_frame = timer;
-    } 
-    }
+    //     vbe_flipBuffer();
+    //     last_frame = timer;
+    // } 
+    // }
+
+    gui_main(); //never returns
 
 
 

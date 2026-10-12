@@ -34,5 +34,9 @@ void vbe_flipBuffer();
 void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 void vbe_clear_backBuffer();
 void vbe_draw_line(int x1, int y1,int x2,int y2, int thickness_px);
+void vbe_set_draw_target(uint8_t * buffer,int width,int height);
+void vbe_reset_draw_target();
+void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
+void vbe_draw_rect_hollow(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 
 #endif

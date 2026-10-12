@@ -21,5 +21,11 @@ struct plane{
 
 struct plane * create_plane(int x_pos,int y_pos,int x_size,int y_size);
 void delete_plane(struct plane * p);
+void plane_draw_start(struct plane * p);
+void plane_draw_end();
+void render_planes();
+
+//desktop.c
+void gui_main();
 
 #endif
