@@ -6,6 +6,11 @@
 #define WIDTH 320
 #define HEIGHT 200
 
+//VBE
+extern uint16_t VBE_WIDTH;
+extern uint16_t VBE_HEIGHT;
+extern int gui_running;
+
 #define MOUSE_COMMAND_STATUS_PORT 0x64
 #define DATA_PORT 0x60
 
@@ -194,7 +199,30 @@ void mouse_handler(){
     }}
 
     //---MOUSE MOVEMENT---
+    if(packet[0] & (0x3<<6)){ //X or Y overflow, packet is garbage
+        return;
+    }
 
+    if(gui_running){
+        //packet[1] and packet[2] are 9 bit signed numbers, 9th bit (sign) is in packet[0]
+        int delta_x = packet[1];
+        int delta_y = packet[2];
+        if(packet[0] & (0x1<<4)) delta_x -= 256; //Moved left
+        if(packet[0] & (0x1<<5)) delta_y -= 256; //Moved down
+
+        mouse_x += delta_x;
+        mouse_y -= delta_y; //for mouse UP is +ve but on screen DOWN is +ve
+
+        //keep cursor inside screen
+        if(mouse_x < 0) mouse_x = 0;
+        if(mouse_y < 0) mouse_y = 0;
+        if(mouse_x >= VBE_WIDTH) mouse_x = VBE_WIDTH-1;
+        if(mouse_y >= VBE_HEIGHT) mouse_y = VBE_HEIGHT-1;
+
+        return; //GUI draws cursor by itself
+    }
+
+    //---OLD 13h MODE MOVEMENT---
     //Moved left
     if(packet[0] & (0x1<<4)){
         if( mouse_x>0 &&(packet[1] !=0)){ //

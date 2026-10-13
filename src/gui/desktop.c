@@ -15,6 +15,10 @@ extern uint16_t VBE_HEIGHT;
 extern uint32_t timer;
 extern uint16_t current_tps;
 
+//Mouse
+extern int mouse_x;
+extern int mouse_y;
+
 int gui_running = 0;
 
 struct plane * background;
@@ -35,9 +39,55 @@ void draw_wallpaper(){
     plane_draw_end();
 }
 
+///---CURSOR---
+#define CURSOR_WIDTH 30
+#define CURSOR_HEIGHT 15
+
+//Penguin beak cursor (same as 13h mode cursor in image_helper.c)
+//values are 13h colors, 255 = transparent
+static const uint8_t cursor_sprite[] = {
+56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+56,56,56,56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+255,56,56,56,56,56,56,56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+255,255,255,56,56,56,20,20,56,56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+255,255,255,255,255,56,56,20,38,38,20,56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+255,255,255,255,255,255,255,56,56,20,38,38,38,20,56,56,56,56,255,255,255,255,255,255,255,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,56,56,20,20,38,38,38,56,56,56,56,255,255,255,255,255,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,56,56,20,38,38,38,38,56,56,56,56,255,255,255,255,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,56,56,20,38,38,38,38,20,56,56,56,255,255,255,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,20,38,38,38,56,56,56,56,56,255,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,56,20,20,20,56,56,56,56,56,255,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,56,56,56,56,56,56,56,56,56,255,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,56,56,56,56,56,56,56,56,56,255,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,56,56,56,56,56,56,56,56,56,255,255,
+255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,56,56,56,56,56,56,56,56,56,56,56,56,255
+};
+
+//13h mode colors 0-63 are from EGA pallet, bits: r g b R G B (small = low intensity, capital = high)
+//each channel = 2*high + low (0 to 3)
+void ega_to_rgb(uint8_t color,uint8_t * RED,uint8_t * GREEN,uint8_t * BLUE){
+    *RED = (((color >> 2) & 0x1)*2 + ((color >> 5) & 0x1)) * 85;
+    *GREEN = (((color >> 1) & 0x1)*2 + ((color >> 4) & 0x1)) * 85;
+    *BLUE = ((color & 0x1)*2 + ((color >> 3) & 0x1)) * 85;
+}
+
+void draw_cursor(){ //directly on backbuffer, always on top of everything
+    uint8_t r,g,b;
+    for(int y=0;y<CURSOR_HEIGHT;y++){
+        for(int x=0;x<CURSOR_WIDTH;x++){
+            uint8_t c = cursor_sprite[(y*CURSOR_WIDTH) + x];
+            if(c == 255) continue; //transparent
+            ega_to_rgb(c,&r,&g,&b);
+            vbe_write_pixel_BackBuffer(mouse_x+x,mouse_y+y,r,g,b);
+        }
+    }
+}
+
 void gui_main(){
     serial_print("[GUI]: Starting Desktop\n");
     gui_running = 1;
+    mouse_x = VBE_WIDTH/2;
+    mouse_y = VBE_HEIGHT/2;
 
     //draw background
     background = create_plane(0,0,VBE_WIDTH,VBE_HEIGHT);
@@ -60,6 +110,7 @@ void gui_main(){
     while(1){
         if(timer >= last_frame + (current_tps/FPS)){
             render_planes();
+            draw_cursor();
             vbe_flipBuffer();
             last_frame = timer;
         }
