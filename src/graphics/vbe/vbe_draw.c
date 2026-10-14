@@ -92,6 +92,39 @@ void vbe_clear_backBuffer(){
     return;
 }
 
+//---TEXT---
+extern const uint8_t font_8x16[95][16];
+
+void vbe_draw_char(int x,int y,char c,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
+    if(c < 32 || c > 126) c = '?'; //not printable
+    const uint8_t * glyph = font_8x16[c - 32];
+
+    for(int row=0;row<FONT_HEIGHT;row++){
+        for(int col=0;col<FONT_WIDTH;col++){
+            if(glyph[row] & (0x80 >> col)){ //MSB is left most pixel
+                vbe_write_pixel_BackBuffer(x+col,y+row,RED,GREEN,BLUE);
+            }
+        }
+    }
+}
+
+//returns how many lines were used
+int vbe_draw_string(int x,int y,const char * str,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
+    int cursor = x;
+    int lines = 1;
+    for(int i=0;str[i] != '\0';i++){
+        if(str[i] == '\n'){
+            cursor = x;
+            y += FONT_HEIGHT;
+            lines++;
+            continue;
+        }
+        vbe_draw_char(cursor,y,str[i],RED,GREEN,BLUE);
+        cursor += FONT_WIDTH;
+    }
+    return lines;
+}
+
 // Shape Draw functions
 
 void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE){

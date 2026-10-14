@@ -29,6 +29,9 @@ void write_pixel_BackBuffer(int x, int y, uint8_t color);
 void write_pixel(int x, int y, uint8_t color);
 
 //VBE draw
+#define FONT_WIDTH 8
+#define FONT_HEIGHT 16
+
 void vbe_draw_init();
 void vbe_flipBuffer();
 void vbe_write_pixel_BackBuffer(int x, int y, uint8_t RED,uint8_t GREEN, uint8_t BLUE);
@@ -38,5 +41,7 @@ void vbe_set_draw_target(uint8_t * buffer,int width,int height);
 void vbe_reset_draw_target();
 void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 void vbe_draw_rect_hollow(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
+void vbe_draw_char(int x,int y,char c,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
+int vbe_draw_string(int x,int y,const char * str,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 
 #endif

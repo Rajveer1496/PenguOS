@@ -99,6 +99,8 @@ void gui_main(){
     vbe_draw_rect_solid(0,0,400,300,220,220,220);
     vbe_draw_rect_solid(0,0,400,24,50,90,160);
     vbe_draw_rect_hollow(0,0,400,300,0,0,0);
+    vbe_draw_string(8,4,"Test Window",255,255,255);
+    vbe_draw_string(10,40,"Pengu says hello to world!!\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=[]{};:'\",.<>/?\\|`~",0,0,0);
     plane_draw_end();
 
     //draw taskbar
