@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #define MAX_PLANES 100
+#define ALWAYS_ON_TOP 100000 //Z_POS for taskbar
+#define TASKBAR_HEIGHT 32
 
 struct plane{
     int x_size;

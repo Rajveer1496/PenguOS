@@ -7,6 +7,7 @@
 #include "gui.h"
 #include "graphics.h"
 #include "debug.h"
+#include "drivers.h"
 
 extern uint16_t VBE_WIDTH;
 extern uint16_t VBE_HEIGHT;
@@ -22,6 +23,7 @@ extern int mouse_y;
 int gui_running = 0;
 
 struct plane * background;
+struct plane * taskbar;
 
 void draw_wallpaper(){
     plane_draw_start(background);
@@ -35,6 +37,41 @@ void draw_wallpaper(){
             vbe_write_pixel_BackBuffer(x,y,r,g,b);
         }
     }
+
+    plane_draw_end();
+}
+
+///---TASKBAR---
+int last_second = -1;
+
+//two digit number to string
+void two_digit(int n,char * str){
+    str[0] = '0' + (n/10);
+    str[1] = '0' + (n%10);
+}
+
+void draw_taskbar(){
+    int hour,minute,second;
+    rtc_get_time(&hour,&minute,&second);
+
+    if(second == last_second) return; //redraw only once per second
+    last_second = second;
+
+    plane_draw_start(taskbar);
+
+    vbe_draw_rect_solid(0,0,taskbar->x_size,TASKBAR_HEIGHT,30,30,40);
+    vbe_draw_rect_solid(0,0,taskbar->x_size,1,90,90,110); //top border line
+
+    //PenguOS button
+    vbe_draw_rect_solid(4,4,84,TASKBAR_HEIGHT-8,50,90,160);
+    vbe_draw_string(14,8,"PenguOS",255,255,255);
+
+    //clock
+    char time_str[9] = "00:00:00";
+    two_digit(hour,&time_str[0]);
+    two_digit(minute,&time_str[3]);
+    two_digit(second,&time_str[6]);
+    vbe_draw_string(taskbar->x_size - (8*FONT_WIDTH) - 12,8,time_str,255,255,255);
 
     plane_draw_end();
 }
@@ -104,6 +141,8 @@ void gui_main(){
     plane_draw_end();
 
     //draw taskbar
+    taskbar = create_plane(0,VBE_HEIGHT-TASKBAR_HEIGHT,VBE_WIDTH,TASKBAR_HEIGHT);
+    taskbar->Z_POS = ALWAYS_ON_TOP;
 
     //draw apps
 
@@ -111,6 +150,7 @@ void gui_main(){
     uint16_t FPS = 60;
     while(1){
         if(timer >= last_frame + (current_tps/FPS)){
+            draw_taskbar();
             render_planes();
             draw_cursor();
             vbe_flipBuffer();

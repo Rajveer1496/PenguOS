@@ -14,4 +14,7 @@ extern void writeESP(uint32_t espVal);
 extern void setTPS(uint16_t TPS);
 extern void wait(uint32_t miliseconds);
 
+//RTC
+void rtc_get_time(int *hour,int *minute,int *second);
+
 #endif
