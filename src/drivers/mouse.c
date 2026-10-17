@@ -109,6 +109,7 @@ void mouse_init(){
 int left_hold = 0;
 int right_hold = 0;
 int middle_hold = 0;
+int left_clicked = 0; //set on press, GUI clears it after handling (so fast clicks dont get missed)
 
 //Mouse cursor variable
 int mouse_x=100;
@@ -163,6 +164,7 @@ void mouse_handler(){
     if(left_hold == 0){
     if(packet[0] & 0x1){ //pressed
         left_hold = 1;
+        left_clicked = 1;
         serial_print("Left key pressed!\n");
     }}
     

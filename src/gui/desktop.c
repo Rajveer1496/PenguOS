@@ -19,6 +19,8 @@ extern uint16_t current_tps;
 //Mouse
 extern int mouse_x;
 extern int mouse_y;
+extern int left_hold;
+extern int left_clicked;
 
 int gui_running = 0;
 
@@ -131,14 +133,15 @@ void gui_main(){
     draw_wallpaper();
 
     //TEST
-    struct plane * test = create_plane(200,150,400,300);
-    plane_draw_start(test);
-    vbe_draw_rect_solid(0,0,400,300,220,220,220);
-    vbe_draw_rect_solid(0,0,400,24,50,90,160);
-    vbe_draw_rect_hollow(0,0,400,300,0,0,0);
-    vbe_draw_string(8,4,"Test Window",255,255,255);
-    vbe_draw_string(10,40,"Pengu says hello to world!!\nABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 !@#$%^&*()_+-=[]{};:'\",.<>/?\\|`~",0,0,0);
-    plane_draw_end();
+    struct window * test = create_window("Test Window",200,150,400,276);
+    window_draw_start(test);
+    vbe_draw_string(10,16,"Pengu says hello to world!!",0,0,0);
+    window_draw_end(test);
+
+    struct window * test2 = create_window("Another one",450,250,300,200);
+    window_draw_start(test2);
+    vbe_draw_string(10,16,"Click on me",0,0,0);
+    window_draw_end(test2);
 
     //draw taskbar
     taskbar = create_plane(0,VBE_HEIGHT-TASKBAR_HEIGHT,VBE_WIDTH,TASKBAR_HEIGHT);
@@ -150,6 +153,13 @@ void gui_main(){
     uint16_t FPS = 60;
     while(1){
         if(timer >= last_frame + (current_tps/FPS)){
+            //mouse click
+            if(left_clicked){
+                left_clicked = 0;
+                window_click(mouse_x,mouse_y);
+            }
+
+            windows_update();
             draw_taskbar();
             render_planes();
             draw_cursor();
