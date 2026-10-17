@@ -60,6 +60,7 @@ void window_draw_end(struct window * w);
 void window_clear(struct window * w,uint8_t RED,uint8_t GREEN,uint8_t BLUE);
 struct window * window_at(int x,int y);
 void window_click(int x,int y);
+void window_drag(int mouse_x,int mouse_y);
 void windows_update();
 
 //desktop.c

@@ -158,6 +158,7 @@ void gui_main(){
                 left_clicked = 0;
                 window_click(mouse_x,mouse_y);
             }
+            window_drag(mouse_x,mouse_y);
 
             windows_update();
             draw_taskbar();

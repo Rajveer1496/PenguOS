@@ -14,6 +14,13 @@ struct window windows[MAX_WINDOWS];
 struct window * focused_window = NULL;
 int top_z = 1; //Z_POS of top most window (background is 0)
 
+//Drag
+struct window * dragging_window = NULL;
+int drag_offset_x = 0; //where on title bar mouse grabbed the window
+int drag_offset_y = 0;
+
+extern int left_hold;
+
 void copy_title(char * dest,const char * src){
     int i=0;
     for(;src[i] != '\0' && i<MAX_TITLE-1;i++){
@@ -61,6 +68,7 @@ struct window * create_window(const char * title,int x,int y,int width,int heigh
 
 void close_window(struct window * w){
     if(w->on_close != NULL) w->on_close(w);
+    if(dragging_window == w) dragging_window = NULL;
 
     delete_plane(w->p);
     w->in_use = 0;
@@ -153,11 +161,39 @@ void window_click(int x,int y){
         int close_x = w->width - CLOSE_BTN_SIZE - 3;
         if(local_x >= close_x && local_x < close_x + CLOSE_BTN_SIZE){
             close_window(w);
+            return;
         }
+
+        //start dragging
+        dragging_window = w;
+        drag_offset_x = local_x;
+        drag_offset_y = local_y;
         return;
     }
 
     if(w->on_click != NULL) w->on_click(w,local_x,local_y - TITLE_BAR_HEIGHT);
+}
+
+//---DRAG---
+void window_drag(int mouse_x,int mouse_y){
+    if(dragging_window == NULL) return;
+
+    if(!left_hold || !dragging_window->in_use){ //released
+        dragging_window = NULL;
+        return;
+    }
+
+    int new_x = mouse_x - drag_offset_x;
+    int new_y = mouse_y - drag_offset_y;
+
+    //keep title bar on screen, else we cant grab it back
+    if(new_y < 0) new_y = 0;
+    if(new_y > VBE_HEIGHT - TASKBAR_HEIGHT - TITLE_BAR_HEIGHT) new_y = VBE_HEIGHT - TASKBAR_HEIGHT - TITLE_BAR_HEIGHT;
+    if(new_x < 50 - dragging_window->p->x_size) new_x = 50 - dragging_window->p->x_size;
+    if(new_x > VBE_WIDTH - 50) new_x = VBE_WIDTH - 50;
+
+    dragging_window->p->x_pos = new_x;
+    dragging_window->p->y_pos = new_y;
 }
 
 //call update of all windows (every frame)
