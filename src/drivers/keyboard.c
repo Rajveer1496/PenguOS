@@ -19,6 +19,10 @@ void ClearStrBuffer(char *str); // to clear entire string buffer
 extern int anim_cursor_x;
 extern int anim_cursor_y;
 
+//GUI
+extern int gui_running;
+extern void gui_key_push(char c);
+
 #define KEYBOARD_DATA_PORT 0x60
 
 // Simple US keyboard scancode to ASCII table (only printable keys)
@@ -123,6 +127,13 @@ void keyboard_handler(void) {
                 c = scancode_to_ascii[scancode];
             }
             
+            //In GUI mode keys go to GUI key buffer, not to text mode shell
+            if(gui_running){
+                if(c != 0) gui_key_push(c);
+                pic_send_eoi(1);
+                return;
+            }
+
             if((ctrl_status == 1) & (scancode == 38) ){ // Ctrl + L , to clear screen
                 cursor_x = 0;
                 cursor_y = 5; 

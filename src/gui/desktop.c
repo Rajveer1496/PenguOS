@@ -150,6 +150,39 @@ void draw_taskbar(){
     plane_draw_end();
 }
 
+///---KEYBOARD---
+//circular buffer, keyboard interrupt pushes and GUI loop pops
+#define KEY_BUFFER_SIZE 64
+char key_buffer[KEY_BUFFER_SIZE];
+volatile int key_head = 0; //write index
+volatile int key_tail = 0; //read index
+
+void gui_key_push(char c){ //called from keyboard interrupt
+    int next = (key_head + 1) % KEY_BUFFER_SIZE;
+    if(next == key_tail) return; //buffer full, drop key
+    key_buffer[key_head] = c;
+    key_head = next;
+}
+
+int gui_key_pop(char * c){ //returns 0 if no key
+    if(key_tail == key_head) return 0;
+    *c = key_buffer[key_tail];
+    key_tail = (key_tail + 1) % KEY_BUFFER_SIZE;
+    return 1;
+}
+
+extern struct window * focused_window;
+
+void handle_keys(){
+    char c;
+    while(gui_key_pop(&c)){
+        // serial_print("[GUI]: key\n");
+        if(focused_window != NULL && focused_window->on_key != NULL){
+            focused_window->on_key(focused_window,c);
+        }
+    }
+}
+
 ///---CURSOR---
 #define CURSOR_WIDTH 30
 #define CURSOR_HEIGHT 15
@@ -223,6 +256,7 @@ void gui_main(){
                 else icon_click(mouse_x,mouse_y);
             }
             window_drag(mouse_x,mouse_y);
+            handle_keys();
 
             windows_update();
             draw_taskbar();
