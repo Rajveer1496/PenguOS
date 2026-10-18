@@ -4,10 +4,12 @@
 
 // combine planes and draw, with depth
 
+#include <stddef.h>
 #include "gui.h"
 #include "graphics.h"
 #include "debug.h"
 #include "drivers.h"
+#include "apps.h"
 
 extern uint16_t VBE_WIDTH;
 extern uint16_t VBE_HEIGHT;
@@ -41,6 +43,76 @@ void draw_wallpaper(){
     }
 
     plane_draw_end();
+}
+
+///---DESKTOP ICONS---
+#define ICON_SIZE 48
+#define ICON_SPACING 80
+#define MAX_ICONS 10
+
+struct desktop_icon{
+    char name[16];
+    int x;
+    int y;
+    void (*open)(); //function to open app
+    void (*draw)(int x,int y); //icon picture
+};
+
+struct desktop_icon icons[MAX_ICONS];
+int icon_count = 0;
+
+void add_icon(const char * name,void (*open)(),void (*draw)(int x,int y)){
+    if(icon_count >= MAX_ICONS) return;
+    struct desktop_icon * icon = &icons[icon_count];
+
+    int i=0;
+    for(;name[i] != '\0' && i<15;i++) icon->name[i] = name[i];
+    icon->name[i] = '\0';
+
+    //icons in a column on left side
+    icon->x = 24;
+    icon->y = 20 + icon_count*ICON_SPACING;
+    icon->open = open;
+    icon->draw = draw;
+    icon_count++;
+}
+
+//icon pictures
+void icon_about(int x,int y){
+    vbe_draw_rect_solid(x,y,ICON_SIZE,ICON_SIZE,50,90,160);
+    vbe_draw_rect_solid(x+22,y+10,5,5,255,255,255); //dot of i
+    vbe_draw_rect_solid(x+22,y+19,5,20,255,255,255);
+}
+
+void draw_icons(){ //on background plane
+    plane_draw_start(background);
+    for(int i=0;i<icon_count;i++){
+        struct desktop_icon * icon = &icons[i];
+        icon->draw(icon->x,icon->y);
+        vbe_draw_rect_hollow(icon->x,icon->y,ICON_SIZE,ICON_SIZE,20,20,30);
+
+        //name in center below icon
+        int len=0;
+        while(icon->name[len] != '\0') len++;
+        int name_x = icon->x + (ICON_SIZE/2) - (len*FONT_WIDTH)/2;
+        vbe_draw_string(name_x+1,icon->y+ICON_SIZE+5,icon->name,0,0,0); //shadow
+        vbe_draw_string(name_x,icon->y+ICON_SIZE+4,icon->name,255,255,255);
+    }
+    plane_draw_end();
+}
+
+int icon_click(int x,int y){ //returns 1 if clicked on icon
+    for(int i=0;i<icon_count;i++){
+        struct desktop_icon * icon = &icons[i];
+        if(x >= icon->x && x < icon->x+ICON_SIZE && y >= icon->y && y < icon->y+ICON_SIZE+20){
+            serial_print("[GUI]: opening ");
+            serial_print(icon->name);
+            NEW_LINE
+            icon->open();
+            return 1;
+        }
+    }
+    return 0;
 }
 
 ///---TASKBAR---
@@ -132,22 +204,13 @@ void gui_main(){
     background = create_plane(0,0,VBE_WIDTH,VBE_HEIGHT);
     draw_wallpaper();
 
-    //TEST
-    struct window * test = create_window("Test Window",200,150,400,276);
-    window_draw_start(test);
-    vbe_draw_string(10,16,"Pengu says hello to world!!",0,0,0);
-    window_draw_end(test);
-
-    struct window * test2 = create_window("Another one",450,250,300,200);
-    window_draw_start(test2);
-    vbe_draw_string(10,16,"Click on me",0,0,0);
-    window_draw_end(test2);
+    //draw apps
+    add_icon("About",open_about,icon_about);
+    draw_icons();
 
     //draw taskbar
     taskbar = create_plane(0,VBE_HEIGHT-TASKBAR_HEIGHT,VBE_WIDTH,TASKBAR_HEIGHT);
     taskbar->Z_POS = ALWAYS_ON_TOP;
-
-    //draw apps
 
     uint32_t last_frame = 0;
     uint16_t FPS = 60;
@@ -156,7 +219,8 @@ void gui_main(){
             //mouse click
             if(left_clicked){
                 left_clicked = 0;
-                window_click(mouse_x,mouse_y);
+                if(window_at(mouse_x,mouse_y) != NULL) window_click(mouse_x,mouse_y);
+                else icon_click(mouse_x,mouse_y);
             }
             window_drag(mouse_x,mouse_y);
 
