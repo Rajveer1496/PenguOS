@@ -5,4 +5,9 @@
 
 void open_about();
 
+//terminal
+void open_terminal();
+void terminal_print(const char * str);
+void terminal_clear();
+
 #endif

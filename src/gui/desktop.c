@@ -84,6 +84,12 @@ void icon_about(int x,int y){
     vbe_draw_rect_solid(x+22,y+19,5,20,255,255,255);
 }
 
+void icon_terminal(int x,int y){
+    vbe_draw_rect_solid(x,y,ICON_SIZE,ICON_SIZE,15,15,20);
+    vbe_draw_rect_solid(x,y,ICON_SIZE,8,110,110,120); //title bar
+    vbe_draw_string(x+6,y+16,">_",80,220,100);
+}
+
 void draw_icons(){ //on background plane
     plane_draw_start(background);
     for(int i=0;i<icon_count;i++){
@@ -238,6 +244,7 @@ void gui_main(){
     draw_wallpaper();
 
     //draw apps
+    add_icon("Terminal",open_terminal,icon_terminal);
     add_icon("About",open_about,icon_about);
     draw_icons();
 
