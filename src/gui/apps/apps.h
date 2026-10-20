@@ -4,6 +4,7 @@
 #include "gui.h"
 
 void open_about();
+void open_paint();
 
 //terminal
 void open_terminal();

@@ -90,6 +90,16 @@ void icon_terminal(int x,int y){
     vbe_draw_string(x+6,y+16,">_",80,220,100);
 }
 
+void icon_paint(int x,int y){
+    vbe_draw_rect_solid(x,y,ICON_SIZE,ICON_SIZE,250,250,250);
+    vbe_draw_rect_solid(x+6,y+6,10,10,220,40,40);
+    vbe_draw_rect_solid(x+19,y+6,10,10,60,180,75);
+    vbe_draw_rect_solid(x+32,y+6,10,10,40,120,220);
+    for(int i=0;i<28;i++){ //brush stroke
+        vbe_draw_rect_solid(x+8+i,y+30+(i%8 < 4 ? i%4 : 4-(i%4)),3,3,140,70,200);
+    }
+}
+
 void draw_icons(){ //on background plane
     plane_draw_start(background);
     for(int i=0;i<icon_count;i++){
@@ -245,6 +255,7 @@ void gui_main(){
 
     //draw apps
     add_icon("Terminal",open_terminal,icon_terminal);
+    add_icon("Paint",open_paint,icon_paint);
     add_icon("About",open_about,icon_about);
     draw_icons();
 
