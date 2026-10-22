@@ -7,17 +7,21 @@
 #define floor(y) ((int)y)
 #define intensity(x) ((int)((x)*(255)))
 
-#define X_2D(x,y) (int)(((((x)*scale) - camera_x)/(camera_z-((y)*scale)))*focal_length + (VBE_WIDTH/2))
-#define Y_2D(x,y) (int)(((((x)*scale) - camera_y)/(camera_z-((y)*scale)))*focal_length + (VBE_HEIGHT/2))
+#define X_2D(x,y) (int)(((((x)*scale) - camera_x)/(camera_z-((y)*scale)))*focal_length + (draw_target_width/2))
+#define Y_2D(x,y) (int)(((((x)*scale) - camera_y)/(camera_z-((y)*scale)))*focal_length + (draw_target_height/2))
 #define LINE(k,m) vbe_draw_line(X_2D(x##k##_rot,z##k##_rot),Y_2D(y##k##_rot,z##k##_rot),X_2D(x##m##_rot,z##m##_rot),Y_2D(y##m##_rot,z##m##_rot),1);
 
 extern uint16_t VBE_WIDTH;
 extern uint16_t VBE_HEIGHT;
 
+//center of where we are drawing (full screen or a window)
+extern int draw_target_width;
+extern int draw_target_height;
+
 void render_obj(struct obj * obj,float camera_x,float camera_y,float camera_z,float scale,float x_rot_angle,float y_rot_angle,float z_rot_angle){
     //TODO
 
-    float focal_length = VBE_WIDTH/2;
+    float focal_length = draw_target_width/2;
 
     // Rotation
     float sin_X;

@@ -6,6 +6,7 @@
 void open_about();
 void open_paint();
 void open_memviz();
+void open_viewer3d();
 
 //terminal
 void open_terminal();

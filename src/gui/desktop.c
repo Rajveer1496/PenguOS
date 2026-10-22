@@ -110,6 +110,20 @@ void icon_memory(int x,int y){
     }
 }
 
+void icon_3d(int x,int y){
+    vbe_draw_rect_solid(x,y,ICON_SIZE,ICON_SIZE,0,0,0);
+    //wire cube
+    vbe_draw_line(x+8,y+16,x+30,y+16,1);
+    vbe_draw_line(x+8,y+38,x+30,y+38,1);
+    vbe_draw_line(x+8,y+16,x+8,y+38,1);
+    vbe_draw_line(x+30,y+16,x+30,y+38,1);
+    vbe_draw_line(x+18,y+8,x+40,y+8,1);
+    vbe_draw_line(x+40,y+8,x+40,y+30,1);
+    vbe_draw_line(x+30,y+38,x+40,y+30,1);
+    vbe_draw_line(x+8,y+16,x+18,y+8,1);
+    vbe_draw_line(x+30,y+16,x+40,y+8,1);
+}
+
 void draw_icons(){ //on background plane
     plane_draw_start(background);
     for(int i=0;i<icon_count;i++){
@@ -267,6 +281,7 @@ void gui_main(){
     add_icon("Terminal",open_terminal,icon_terminal);
     add_icon("Paint",open_paint,icon_paint);
     add_icon("Memory",open_memviz,icon_memory);
+    add_icon("3D Viewer",open_viewer3d,icon_3d);
     add_icon("About",open_about,icon_about);
     draw_icons();
 
