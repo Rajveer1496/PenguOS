@@ -100,6 +100,16 @@ void icon_paint(int x,int y){
     }
 }
 
+void icon_memory(int x,int y){
+    vbe_draw_rect_solid(x,y,ICON_SIZE,ICON_SIZE,230,230,230);
+    for(int i=0;i<36;i++){ //6x6 small grid
+        int cx = x + 4 + (i%6)*7;
+        int cy = y + 4 + (i/6)*7;
+        if(i < 15 || i == 20 || i == 27) vbe_draw_rect_solid(cx,cy,6,6,220,60,60);
+        else vbe_draw_rect_solid(cx,cy,6,6,60,170,80);
+    }
+}
+
 void draw_icons(){ //on background plane
     plane_draw_start(background);
     for(int i=0;i<icon_count;i++){
@@ -256,6 +266,7 @@ void gui_main(){
     //draw apps
     add_icon("Terminal",open_terminal,icon_terminal);
     add_icon("Paint",open_paint,icon_paint);
+    add_icon("Memory",open_memviz,icon_memory);
     add_icon("About",open_about,icon_about);
     draw_icons();
 

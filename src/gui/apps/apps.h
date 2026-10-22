@@ -5,6 +5,7 @@
 
 void open_about();
 void open_paint();
+void open_memviz();
 
 //terminal
 void open_terminal();
