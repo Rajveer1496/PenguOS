@@ -43,5 +43,6 @@ void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GR
 void vbe_draw_rect_hollow(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 void vbe_draw_char(int x,int y,char c,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 int vbe_draw_string(int x,int y,const char * str,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
+void vbe_draw_string_scaled(int x,int y,const char * str,int scale,uint8_t RED,uint8_t GREEN, uint8_t BLUE);
 
 #endif

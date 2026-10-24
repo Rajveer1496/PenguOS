@@ -42,6 +42,13 @@ void draw_wallpaper(){
         }
     }
 
+    //PenguOS logo (bottom right)
+    int logo_scale = 8;
+    int logo_x = VBE_WIDTH - (7*FONT_WIDTH*logo_scale) - 40;
+    int logo_y = VBE_HEIGHT - TASKBAR_HEIGHT - (FONT_HEIGHT*logo_scale) - 30;
+    vbe_draw_string_scaled(logo_x+6,logo_y+6,"PenguOS",logo_scale,15,25,55); //shadow
+    vbe_draw_string_scaled(logo_x,logo_y,"PenguOS",logo_scale,255,255,255);
+
     plane_draw_end();
 }
 

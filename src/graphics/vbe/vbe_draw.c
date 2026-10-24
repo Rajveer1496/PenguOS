@@ -125,6 +125,23 @@ int vbe_draw_string(int x,int y,const char * str,uint8_t RED,uint8_t GREEN, uint
     return lines;
 }
 
+//big text, every font pixel becomes scale x scale block
+void vbe_draw_string_scaled(int x,int y,const char * str,int scale,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
+    for(int i=0;str[i] != '\0';i++){
+        char c = str[i];
+        if(c < 32 || c > 126) c = '?';
+        const uint8_t * glyph = font_8x16[c - 32];
+
+        for(int row=0;row<FONT_HEIGHT;row++){
+            for(int col=0;col<FONT_WIDTH;col++){
+                if(glyph[row] & (0x80 >> col)){
+                    vbe_draw_rect_solid(x + (i*FONT_WIDTH + col)*scale,y + row*scale,scale,scale,RED,GREEN,BLUE);
+                }
+            }
+        }
+    }
+}
+
 // Shape Draw functions
 
 void vbe_draw_rect_solid(int x,int y,int width,int height,uint8_t RED,uint8_t GREEN, uint8_t BLUE){
