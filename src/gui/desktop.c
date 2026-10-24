@@ -156,7 +156,14 @@ int icon_click(int x,int y){ //returns 1 if clicked on icon
 }
 
 ///---TASKBAR---
+#define TASKBAR_BTN_WIDTH 140
+#define TASKBAR_BTN_START 100 //after PenguOS button
+
 int last_second = -1;
+int taskbar_dirty = 1; //set when windows change, so taskbar is redrawn
+
+extern struct window windows[MAX_WINDOWS];
+extern struct window * focused_window;
 
 //two digit number to string
 void two_digit(int n,char * str){
@@ -168,8 +175,9 @@ void draw_taskbar(){
     int hour,minute,second;
     rtc_get_time(&hour,&minute,&second);
 
-    if(second == last_second) return; //redraw only once per second
+    if(second == last_second && !taskbar_dirty) return; //redraw only once per second (or when windows change)
     last_second = second;
+    taskbar_dirty = 0;
 
     plane_draw_start(taskbar);
 
@@ -180,6 +188,26 @@ void draw_taskbar(){
     vbe_draw_rect_solid(4,4,84,TASKBAR_HEIGHT-8,50,90,160);
     vbe_draw_string(14,8,"PenguOS",255,255,255);
 
+    //window buttons
+    int x = TASKBAR_BTN_START;
+    for(int i=0;i<MAX_WINDOWS;i++){
+        struct window * w = &windows[i];
+        if(!w->in_use) continue;
+
+        if(w == focused_window) vbe_draw_rect_solid(x,4,TASKBAR_BTN_WIDTH,TASKBAR_HEIGHT-8,70,110,180);
+        else if(w->minimized) vbe_draw_rect_solid(x,4,TASKBAR_BTN_WIDTH,TASKBAR_HEIGHT-8,45,45,55);
+        else vbe_draw_rect_solid(x,4,TASKBAR_BTN_WIDTH,TASKBAR_HEIGHT-8,70,70,85);
+
+        //title (cut if too long)
+        char title[17];
+        int j=0;
+        for(;w->title[j] != '\0' && j<16;j++) title[j] = w->title[j];
+        title[j] = '\0';
+        vbe_draw_string(x+8,8,title,255,255,255);
+
+        x += TASKBAR_BTN_WIDTH + 4;
+    }
+
     //clock
     char time_str[9] = "00:00:00";
     two_digit(hour,&time_str[0]);
@@ -188,6 +216,22 @@ void draw_taskbar(){
     vbe_draw_string(taskbar->x_size - (8*FONT_WIDTH) - 12,8,time_str,255,255,255);
 
     plane_draw_end();
+}
+
+void taskbar_click(int x){
+    int btn_x = TASKBAR_BTN_START;
+    for(int i=0;i<MAX_WINDOWS;i++){
+        struct window * w = &windows[i];
+        if(!w->in_use) continue;
+
+        if(x >= btn_x && x < btn_x + TASKBAR_BTN_WIDTH){
+            if(w->minimized) window_focus(w); //restore
+            else if(w == focused_window) window_minimize(w);
+            else window_focus(w);
+            return;
+        }
+        btn_x += TASKBAR_BTN_WIDTH + 4;
+    }
 }
 
 ///---KEYBOARD---
@@ -296,7 +340,8 @@ void gui_main(){
             //mouse click
             if(left_clicked){
                 left_clicked = 0;
-                if(window_at(mouse_x,mouse_y) != NULL) window_click(mouse_x,mouse_y);
+                if(mouse_y >= VBE_HEIGHT - TASKBAR_HEIGHT) taskbar_click(mouse_x);
+                else if(window_at(mouse_x,mouse_y) != NULL) window_click(mouse_x,mouse_y);
                 else icon_click(mouse_x,mouse_y);
             }
             window_drag(mouse_x,mouse_y);

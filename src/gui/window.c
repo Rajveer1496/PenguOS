@@ -20,6 +20,7 @@ int drag_offset_x = 0; //where on title bar mouse grabbed the window
 int drag_offset_y = 0;
 
 extern int left_hold;
+extern int taskbar_dirty; //desktop.c (taskbar needs redraw)
 
 void copy_title(char * dest,const char * src){
     int i=0;
@@ -27,6 +28,18 @@ void copy_title(char * dest,const char * src){
         dest[i] = src[i];
     }
     dest[i] = '\0';
+}
+
+//give focus to next top most visible window
+void focus_next_window(){
+    focused_window = NULL;
+    struct window * next = NULL;
+    for(int i=0;i<MAX_WINDOWS;i++){
+        if(windows[i].in_use && !windows[i].minimized && (next == NULL || windows[i].p->Z_POS > next->p->Z_POS)){
+            next = &windows[i];
+        }
+    }
+    if(next != NULL) window_focus(next);
 }
 
 struct window * create_window(const char * title,int x,int y,int width,int height){
@@ -51,6 +64,7 @@ struct window * create_window(const char * title,int x,int y,int width,int heigh
     w->width = width;
     w->height = height;
     w->in_use = 1;
+    w->minimized = 0;
 
     //no app attached yet
     w->on_draw = NULL;
@@ -73,16 +87,8 @@ void close_window(struct window * w){
     delete_plane(w->p);
     w->in_use = 0;
 
-    if(focused_window == w){ //give focus to next top most window
-        focused_window = NULL;
-        struct window * next = NULL;
-        for(int i=0;i<MAX_WINDOWS;i++){
-            if(windows[i].in_use && (next == NULL || windows[i].p->Z_POS > next->p->Z_POS)){
-                next = &windows[i];
-            }
-        }
-        if(next != NULL) window_focus(next);
-    }
+    if(focused_window == w) focus_next_window();
+    taskbar_dirty = 1;
 }
 
 void draw_window_frame(struct window * w){
@@ -99,6 +105,11 @@ void draw_window_frame(struct window * w){
     vbe_draw_rect_solid(close_x,3,CLOSE_BTN_SIZE,CLOSE_BTN_SIZE,200,60,60);
     vbe_draw_char(close_x+5,2,'x',255,255,255);
 
+    //minimize button
+    int min_x = close_x - CLOSE_BTN_SIZE - 3;
+    vbe_draw_rect_solid(min_x,3,CLOSE_BTN_SIZE,CLOSE_BTN_SIZE,80,80,90);
+    vbe_draw_char(min_x+5,0,'_',255,255,255);
+
     //border
     vbe_draw_rect_hollow(0,0,w->p->x_size,w->p->y_size,20,20,30);
 
@@ -106,6 +117,8 @@ void draw_window_frame(struct window * w){
 }
 
 void window_focus(struct window * w){
+    if(w->minimized) window_restore(w);
+
     struct window * old = focused_window;
     focused_window = w;
 
@@ -114,6 +127,21 @@ void window_focus(struct window * w){
 
     if(old != NULL && old != w && old->in_use) draw_window_frame(old); //grey title
     draw_window_frame(w);
+    taskbar_dirty = 1;
+}
+
+void window_minimize(struct window * w){
+    w->minimized = 1;
+    w->p->visible = 0;
+    if(dragging_window == w) dragging_window = NULL;
+    if(focused_window == w) focus_next_window();
+    taskbar_dirty = 1;
+}
+
+void window_restore(struct window * w){
+    w->minimized = 0;
+    w->p->visible = 1;
+    taskbar_dirty = 1;
 }
 
 //to draw inside window (0,0 is just below title bar)
@@ -138,7 +166,7 @@ struct window * window_at(int x,int y){
     struct window * top = NULL;
     for(int i=0;i<MAX_WINDOWS;i++){
         struct window * w = &windows[i];
-        if(!w->in_use) continue;
+        if(!w->in_use || w->minimized) continue;
         if(x >= w->p->x_pos && x < w->p->x_pos + w->p->x_size && y >= w->p->y_pos && y < w->p->y_pos + w->p->y_size){
             if(top == NULL || w->p->Z_POS > top->p->Z_POS) top = w;
         }
@@ -161,6 +189,12 @@ void window_click(int x,int y){
         int close_x = w->width - CLOSE_BTN_SIZE - 3;
         if(local_x >= close_x && local_x < close_x + CLOSE_BTN_SIZE){
             close_window(w);
+            return;
+        }
+
+        int min_x = close_x - CLOSE_BTN_SIZE - 3;
+        if(local_x >= min_x && local_x < min_x + CLOSE_BTN_SIZE){
+            window_minimize(w);
             return;
         }
 

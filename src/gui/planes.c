@@ -45,6 +45,7 @@ struct plane * create_plane(int x_pos,int y_pos,int x_size,int y_size){
     memInit_fast(p->buffer,p->pages*4096);
 
     p->in_use = 1;
+    p->visible = 1;
     planectr++;
 
     return p;
@@ -101,7 +102,7 @@ void render_planes(){
         }
         if(next == NULL) break;
 
-        paste_plane(next);
+        if(next->visible) paste_plane(next);
         last_z = next->Z_POS;
         done++;
     }

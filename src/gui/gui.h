@@ -17,8 +17,9 @@ struct plane{
     uint8_t * buffer;
     uint32_t pages; //no of pages used by buffer (to free it later)
 
-    int Z_POS; // for render priority // TODO
+    int Z_POS; // for render priority
     int in_use;
+    int visible; //hidden planes are not rendered (minimized windows)
 };
 
 #define MAX_WINDOWS 20
@@ -32,6 +33,7 @@ struct window{
     int width; //client area (without title bar)
     int height;
     int in_use;
+    int minimized;
 
     //app callbacks (NULL if not needed)
     void (*on_draw)(struct window * w);
@@ -62,6 +64,8 @@ struct window * window_at(int x,int y);
 void window_click(int x,int y);
 void window_drag(int mouse_x,int mouse_y);
 void windows_update();
+void window_minimize(struct window * w);
+void window_restore(struct window * w);
 
 //desktop.c
 void gui_main();
