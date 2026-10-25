@@ -233,7 +233,7 @@ void window_drag(int mouse_x,int mouse_y){
 //call update of all windows (every frame)
 void windows_update(){
     for(int i=0;i<MAX_WINDOWS;i++){
-        if(windows[i].in_use && windows[i].on_update != NULL){
+        if(windows[i].in_use && !windows[i].minimized && windows[i].on_update != NULL){ //no need to update hidden windows (3D viewer was rendering in background)
             windows[i].on_update(&windows[i]);
         }
     }
